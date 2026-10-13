@@ -3,7 +3,7 @@
    Use código do país + DDD + número, somente dígitos.
    Exemplo de formato: 5587999999999
 */
-const PCVANCE_WHATSAPP = "5587999034059"; // TROQUE PELO NÚMERO REAL
+const PCVANCE_WHATSAPP = "5587999999999"; // TROQUE PELO NÚMERO REAL
 
 document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.getElementById("menuToggle");
