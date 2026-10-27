@@ -1,354 +1,214 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080d18">
-  <title>PCVANCE | Gestão de Ordens de Serviço</title>
+  <meta name="description" content="PCVance — assistência técnica, manutenção e otimização de computadores e notebooks.">
+  <meta name="theme-color" content="#101827">
+  <title>PCVance | Assistência e Performance</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="app">
+  <header class="header" id="topo">
+    <a class="brand" href="#inicio" aria-label="PCVance - início">
+      <span class="brand-icon"><i class="fa-solid fa-microchip"></i></span>
+      <span>PC<span>VANCE</span><small>ASSISTÊNCIA & PERFORMANCE</small></span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <nav class="nav" id="mainNav">
+      <a href="#inicio">Início</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#processo">Como funciona</a>
+      <a href="#contato" class="nav-cta">Solicitar orçamento <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="acesso.html" class="nav-login"><i class="fa-solid fa-user-lock"></i> Área do cliente</a>
+    </nav>
+  </header>
 
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-symbol">PC</div>
-        <div>
-          <h2>PCVANCE</h2>
-          <small>GESTÃO TÉCNICA</small>
+  <main>
+    <section class="hero section" id="inicio">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> TECNOLOGIA SEM COMPLICAÇÃO</div>
+        <h1>Seu computador.<br><span>Mais rápido.</span><br>Mais eficiente.</h1>
+        <p class="hero-text">Manutenção, otimização e suporte para deixar seu computador ou notebook funcionando melhor — com atendimento claro e soluções sob medida.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contato">Quero um orçamento <i class="fa-solid fa-arrow-right"></i></a>
+          <a class="btn btn-outline" href="#servicos"><i class="fa-solid fa-screwdriver-wrench"></i> Ver serviços</a>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon"><i class="fa-solid fa-check"></i></div>
+          <p><strong>Atendimento transparente</strong><br><span>Você entende o que será feito e por quê.</span></p>
         </div>
       </div>
+      <div class="hero-visual" aria-label="Ilustração de computador">
+        <div class="glow"></div>
+        <div class="status-card status-top"><span class="status-dot"></span><div><strong>Sistema otimizado</strong><small>Desempenho em foco</small></div><i class="fa-solid fa-check-circle"></i></div>
+        <div class="monitor">
+          <div class="monitor-screen">
+            <div class="screen-top"><span></span><span></span><span></span><b>PCVANCE / PERFORMANCE</b></div>
+            <div class="screen-content">
+              <div class="screen-symbol"><i class="fa-solid fa-bolt"></i></div>
+              <span class="screen-label">PERFORMANCE MODE</span>
+              <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <strong>PC<span>VANCE</span></strong>
+              <small>MAIS DESEMPENHO. MENOS DOR DE CABEÇA.</small>
+            </div>
+          </div>
+          <div class="monitor-neck"></div><div class="monitor-base"></div>
+        </div>
+        <div class="status-card status-bottom"><div class="mini-icon"><i class="fa-solid fa-gauge-high"></i></div><div><strong>Otimização inteligente</strong><small>Do diagnóstico à solução</small></div></div>
+      </div>
+    </section>
 
-      <div class="nav-label">MENU PRINCIPAL</div>
-      <button class="nav-item active" data-page="dashboard">▦ Dashboard</button>
-      <button class="nav-item" data-page="nova">＋ Criar ordem de serviço</button>
-      <button class="nav-item" data-page="ordens">▤ Gerenciar OS</button>
+    <section class="benefit-strip">
+      <div><i class="fa-solid fa-laptop"></i><span>Computadores e notebooks</span></div>
+      <div><i class="fa-solid fa-wand-magic-sparkles"></i><span>Otimização de desempenho</span></div>
+      <div><i class="fa-solid fa-shield-halved"></i><span>Cuidado com seus arquivos</span></div>
+      <div><i class="fa-solid fa-comments"></i><span>Comunicação transparente</span></div>
+    </section>
 
-      <div class="nav-label">SISTEMA</div>
-      <button class="nav-item" id="logoutButton" type="button">↪ Sair da conta</button>
-      <button class="nav-item" data-page="relatorios">▥ Relatórios</button>
-      <button class="nav-item" data-page="configuracoes">⚙ Configurações</button>
+    <section class="section services-section" id="servicos">
+      <div class="section-heading">
+        <span class="eyebrow">O QUE FAZEMOS</span>
+        <h2>Soluções para seu <span>PC render mais.</span></h2>
+        <p>Do computador lento à manutenção preventiva: escolha o que você precisa e fale com a PCVance.</p>
+      </div>
+      <div class="service-grid">
+        <article class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-gauge-high"></i></div>
+          <span class="card-number">01 / PERFORMANCE</span>
+          <h3>Otimização de PC</h3>
+          <p>Análise de lentidão, programas de inicialização, configurações e ajustes para melhorar a experiência de uso.</p>
+          <a href="#contato" class="service-link" data-service="Otimização de PC">Solicitar serviço <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </article>
+        <article class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+          <span class="card-number">02 / MANUTENÇÃO</span>
+          <h3>Manutenção preventiva</h3>
+          <p>Cuidados para reduzir problemas, avaliar o funcionamento e ajudar a prolongar a vida útil do equipamento.</p>
+          <a href="#contato" class="service-link" data-service="Manutenção preventiva">Solicitar serviço <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </article>
+        <article class="service-card">
+          <div class="service-icon"><i class="fa-brands fa-windows"></i></div>
+          <span class="card-number">03 / SISTEMA</span>
+          <h3>Formatação e instalação</h3>
+          <p>Instalação ou reinstalação do sistema operacional, drivers e programas necessários, conforme compatibilidade.</p>
+          <a href="#contato" class="service-link" data-service="Formatação e instalação">Solicitar serviço <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </article>
+        <article class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-memory"></i></div>
+          <span class="card-number">04 / UPGRADES</span>
+          <h3>Upgrade de hardware</h3>
+          <p>Orientação para melhorias como SSD, memória RAM e outros componentes compatíveis com seu equipamento.</p>
+          <a href="#contato" class="service-link" data-service="Upgrade de hardware">Solicitar serviço <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </article>
+        <article class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-bug-slash"></i></div>
+          <span class="card-number">05 / DIAGNÓSTICO</span>
+          <h3>Diagnóstico de problemas</h3>
+          <p>Verificação inicial de falhas, travamentos, aquecimento ou mensagens de erro para indicar os próximos passos.</p>
+          <a href="#contato" class="service-link" data-service="Diagnóstico de problemas">Solicitar serviço <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </article>
+        <article class="service-card featured-card">
+          <div class="service-icon"><i class="fa-solid fa-headset"></i></div>
+          <span class="card-number">06 / SUPORTE</span>
+          <h3>Ajuda e orientação</h3>
+          <p>Orientação para dúvidas de uso, configuração de programas e boas práticas para manter seu PC organizado.</p>
+          <a href="#contato" class="service-link" data-service="Suporte e orientação">Solicitar serviço <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </article>
+      </div>
+    </section>
 
-      <div class="sidebar-footer">
-        <div class="status-dot"></div>
-        <div>
-          <strong>Sistema PCVANCE</strong>
-          <small>Versão inicial · Local</small>
+    <section class="about-section" id="sobre">
+      <div class="section about-layout">
+        <div class="about-art">
+          <div class="about-grid"></div>
+          <div class="chip-card"><i class="fa-solid fa-microchip"></i><span>PCV</span><small>TECH CARE</small></div>
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="about-badge"><i class="fa-solid fa-circle-check"></i> Solução com propósito</div>
+        </div>
+        <div class="about-copy">
+          <span class="eyebrow">SOBRE A PCVANCE</span>
+          <h2>Tecnologia deve <span>facilitar sua vida.</span></h2>
+          <p>A PCVance nasceu com a proposta de ajudar pessoas a cuidar melhor de seus computadores, resolver problemas do dia a dia e buscar mais desempenho sem complicação.</p>
+          <p>Nosso foco é entender a necessidade de cada cliente, explicar as opções disponíveis e recomendar apenas o que fizer sentido para o equipamento.</p>
+          <div class="about-points">
+            <div><i class="fa-solid fa-check"></i><span>Explicação clara do serviço</span></div>
+            <div><i class="fa-solid fa-check"></i><span>Soluções conforme a necessidade</span></div>
+            <div><i class="fa-solid fa-check"></i><span>Prioridade ao cuidado com os dados</span></div>
+          </div>
+          <a class="text-link" href="#contato">Vamos conversar <i class="fa-solid fa-arrow-right"></i></a>
         </div>
       </div>
-    </aside>
+    </section>
 
-    <main class="main">
-      <header class="topbar">
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
-        <div>
-          <span class="breadcrumb">PCVANCE /</span>
-          <strong id="pageTitle">Dashboard</strong>
-        </div>
-        <div class="topbar-right">
-          <span class="online-badge"><span></span> Sistema ativo</span>
-          <div class="avatar">PC</div>
-        </div>
-      </header>
-
-      <div class="content">
-
-        <!-- DASHBOARD -->
-        <section class="page active" id="page-dashboard">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">VISÃO GERAL</p>
-              <h1>Dashboard</h1>
-              <p class="muted">Acompanhe os atendimentos da PCVANCE.</p>
-            </div>
-            <button class="btn primary" data-go="nova">＋ Nova ordem de serviço</button>
-          </div>
-
-          <div class="stats-grid">
-            <article class="stat-card">
-              <div class="stat-icon blue">▤</div>
-              <span>Total de OS</span>
-              <strong id="statTotal">0</strong>
-              <small>Ordens cadastradas</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-icon orange">◷</div>
-              <span>Em andamento</span>
-              <strong id="statAndamento">0</strong>
-              <small>Em execução</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-icon purple">✓</div>
-              <span>Aguardando aprovação</span>
-              <strong id="statAprovacao">0</strong>
-              <small>Orçamentos pendentes</small>
-            </article>
-            <article class="stat-card">
-              <div class="stat-icon green">✔</div>
-              <span>Concluídas</span>
-              <strong id="statConcluidas">0</strong>
-              <small>Serviços finalizados</small>
-            </article>
-          </div>
-
-          <div class="panel">
-            <div class="panel-heading">
-              <div>
-                <h2>Ordens recentes</h2>
-                <p class="muted">Últimos atendimentos cadastrados.</p>
-              </div>
-              <button class="btn secondary small" data-go="ordens">Ver todas</button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nº OS</th>
-                    <th>Cliente</th>
-                    <th>Equipamento</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="recentTable"></tbody>
-              </table>
-            </div>
-            <div class="empty-state" id="recentEmpty">
-              <div class="empty-icon">▤</div>
-              <strong>Nenhuma ordem cadastrada</strong>
-              <p>Crie sua primeira OS para começar.</p>
-              <button class="btn primary" data-go="nova">Criar primeira OS</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- NOVA OS -->
-        <section class="page" id="page-nova">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">ATENDIMENTO TÉCNICO</p>
-              <h1 id="formTitle">Criar ordem de serviço</h1>
-              <p class="muted">Preencha os dados do cliente e do atendimento.</p>
-            </div>
-            <button class="btn secondary" data-go="ordens">← Voltar para OS</button>
-          </div>
-
-          <form id="osForm">
-            <input type="hidden" id="editId">
-
-            <div class="form-meta">
-              <div>
-                <label>Número da OS</label>
-                <input id="osNumber" readonly>
-              </div>
-              <div>
-                <label>Data de abertura *</label>
-                <input type="date" id="dataAbertura" required>
-              </div>
-              <div>
-                <label>Previsão de entrega</label>
-                <input type="date" id="dataPrevisao">
-              </div>
-              <div>
-                <label>Técnico responsável *</label>
-                <input id="tecnico" placeholder="Nome do colaborador" required>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>01</span><div><h2>Dados do cliente</h2><p>Informações para contato e identificação.</p></div></div>
-              <div class="form-grid">
-                <div class="field span-2"><label>Nome completo / Empresa *</label><input id="cliente" required placeholder="Nome do cliente ou empresa"></div>
-                <div class="field"><label>CPF / CNPJ</label><input id="documento" placeholder="Documento do cliente"></div>
-                <div class="field"><label>Telefone / WhatsApp *</label><input id="telefone" required placeholder="(00) 00000-0000"></div>
-                <div class="field span-2"><label>E-mail</label><input type="email" id="email" placeholder="cliente@email.com"></div>
-                <div class="field span-2"><label>Endereço</label><input id="endereco" placeholder="Rua, número e bairro"></div>
-                <div class="field"><label>Cidade / UF</label><input id="cidade" placeholder="Cidade - UF"></div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>02</span><div><h2>Identificação do equipamento</h2><p>Registre o equipamento recebido e seus acessórios.</p></div></div>
-              <div class="form-grid">
-                <div class="field"><label>Tipo de equipamento *</label>
-                  <select id="tipoEquipamento" required>
-                    <option value="">Selecione</option>
-                    <option>Desktop</option><option>Notebook</option>
-                    <option>Computador All-in-One</option><option>Impressora</option>
-                    <option>Monitor</option><option>Outro</option>
-                  </select>
-                </div>
-                <div class="field"><label>Marca / Modelo</label><input id="marca" placeholder="Ex.: Dell Inspiron"></div>
-                <div class="field"><label>Número de série</label><input id="serie" placeholder="Número de série"></div>
-                <div class="field"><label>Acessórios recebidos</label><input id="acessorios" placeholder="Carregador, cabo, mouse..."></div>
-                <div class="field"><label>Senha de acesso (opcional)</label><input id="senha" placeholder="Somente se necessária e autorizada"></div>
-                <div class="field"><label>Estado físico aparente</label><input id="estadoFisico" placeholder="Riscos, trincas, amassados..."></div>
-              </div>
-              <p class="notice">Privacidade: evite registrar senhas pessoais. Se o acesso for necessário, obtenha autorização e prefira credenciais temporárias.</p>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>03</span><div><h2>Relato e avaliação inicial</h2><p>Registre o que o cliente informou e o estado de entrada.</p></div></div>
-              <div class="form-grid">
-                <div class="field span-2"><label>Problema relatado pelo cliente *</label><textarea id="problema" required rows="3" placeholder="Descreva o defeito informado pelo cliente..."></textarea></div>
-                <div class="field span-2"><label>Condição observada na entrada / avarias</label><textarea id="avarias" rows="3" placeholder="Registre as condições verificadas ao receber o equipamento..."></textarea></div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>04</span><div><h2>Serviços e orçamento</h2><p>Adicione serviços, mão de obra e peças.</p></div></div>
-              <div class="table-wrap">
-                <table class="items-table">
-                  <thead><tr><th>Serviço / peça</th><th>Qtd.</th><th>Valor unit. (R$)</th><th>Subtotal</th><th></th></tr></thead>
-                  <tbody id="itemsBody"></tbody>
-                </table>
-              </div>
-              <button type="button" class="btn secondary small add-item" id="addItem">＋ Adicionar item</button>
-              <div class="budget-bottom">
-                <div class="field"><label>Forma de pagamento</label><select id="pagamento"><option value="">A combinar</option><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Outro</option></select></div>
-                <div class="field"><label>Status da aprovação</label><select id="aprovacao"><option>Pendente</option><option>Aprovado</option><option>Recusado</option></select></div>
-                <div class="total-box"><span>Valor total</span><strong id="totalOrcamento">R$ 0,00</strong></div>
-              </div>
-              <div class="form-grid approval-row">
-                <div class="field"><label>Data da aprovação</label><input type="date" id="dataAprovacao"></div>
-                <div class="field"><label>Observação do orçamento</label><input id="obsOrcamento" placeholder="Condições combinadas com o cliente"></div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>05</span><div><h2>Diagnóstico e execução</h2><p>Preencha durante ou após a avaliação técnica.</p></div></div>
-              <div class="form-grid">
-                <div class="field span-2"><label>Diagnóstico técnico</label><textarea id="diagnostico" rows="3" placeholder="Causa provável ou confirmada do problema..."></textarea></div>
-                <div class="field span-2"><label>Serviços efetivamente realizados</label><textarea id="servicosRealizados" rows="3" placeholder="Descreva os procedimentos executados..."></textarea></div>
-                <div class="field span-2"><label>Peças substituídas / observações</label><textarea id="pecasObservacoes" rows="2" placeholder="Peças utilizadas, números de série e observações..."></textarea></div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>06</span><div><h2>Testes e entrega</h2><p>Registre os testes e a situação final.</p></div></div>
-              <div class="check-grid">
-                <label class="check-option"><input type="checkbox" name="testes" value="Equipamento ligado"> Equipamento ligado</label>
-                <label class="check-option"><input type="checkbox" name="testes" value="Sistema testado"> Sistema testado</label>
-                <label class="check-option"><input type="checkbox" name="testes" value="Rede/Wi-Fi testada"> Rede / Wi-Fi testada</label>
-                <label class="check-option"><input type="checkbox" name="testes" value="Periféricos testados"> Periféricos testados</label>
-              </div>
-              <div class="form-grid">
-                <div class="field"><label>Status da ordem *</label>
-                  <select id="status" required>
-                    <option>Aberta</option><option>Aguardando aprovação</option>
-                    <option>Aguardando peça</option><option>Em andamento</option>
-                    <option>Concluída</option><option>Sem reparo</option>
-                    <option>Retirada sem execução</option>
-                  </select>
-                </div>
-                <div class="field"><label>Teste específico</label><input id="testeEspecifico" placeholder="Outro teste realizado"></div>
-                <div class="field span-2"><label>Observações finais / recomendações</label><textarea id="observacoesFinais" rows="3" placeholder="Orientações, recomendações e pendências..."></textarea></div>
-              </div>
-            </div>
-
-            <div class="form-section">
-              <div class="section-title"><span>07</span><div><h2>Termos e autorização</h2><p>Confirme as condições antes de concluir o cadastro.</p></div></div>
-              <div class="terms-box">
-                <p>• O cliente declara que as informações fornecidas sobre o defeito são verdadeiras e autoriza a avaliação e os serviços expressamente aprovados nesta OS.</p>
-                <p>• Serviços adicionais, troca de peças ou custos não previstos dependem de comunicação e aprovação prévia do cliente.</p>
-                <p>• O cliente declara estar ciente dos riscos aos dados durante intervenções técnicas. Recomenda-se manter cópia de segurança; backup ou recuperação de dados deve ser previamente acordado.</p>
-                <p>• Equipamento e acessórios devem ser conferidos na entrada e na retirada. Garantia, prazos e condições aplicáveis devem ser informados por escrito conforme o serviço e a legislação vigente.</p>
-              </div>
-              <label class="check-option consent"><input type="checkbox" id="termosAceitos"> Termos apresentados ao cliente e autorização registrada.</label>
-              <div class="form-grid signatures">
-                <div class="field"><label>Nome de quem autorizou</label><input id="nomeAutorizador" placeholder="Nome do cliente ou responsável"></div>
-                <div class="field"><label>Nome do técnico na entrega</label><input id="nomeEntrega" placeholder="Nome do responsável técnico"></div>
-              </div>
-              <p class="muted small-text">Os campos de nomes registram a identificação, mas não substituem uma assinatura eletrônica válida quando ela for necessária.</p>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn secondary" data-go="ordens">Cancelar</button>
-              <button type="submit" class="btn primary">Salvar ordem de serviço →</button>
-            </div>
-          </form>
-        </section>
-
-        <!-- LISTAGEM -->
-        <section class="page" id="page-ordens">
-          <div class="page-heading">
-            <div><p class="eyebrow">CONTROLE DE ATENDIMENTOS</p><h1>Gerenciar OS</h1><p class="muted">Consulte, edite, imprima ou atualize as ordens cadastradas.</p></div>
-            <button class="btn primary" data-go="nova">＋ Nova OS</button>
-          </div>
-          <div class="panel filters">
-            <div class="field search-field"><label>Pesquisar</label><input id="searchOS" placeholder="Número, cliente, telefone ou equipamento..."></div>
-            <div class="field"><label>Status</label><select id="filterStatus"><option value="">Todos os status</option><option>Aberta</option><option>Aguardando aprovação</option><option>Aguardando peça</option><option>Em andamento</option><option>Concluída</option><option>Sem reparo</option><option>Retirada sem execução</option></select></div>
-            <div class="field"><label>Ordenar por</label><select id="sortOS"><option value="recent">Mais recentes</option><option value="old">Mais antigas</option><option value="client">Nome do cliente</option></select></div>
-          </div>
-          <div class="panel">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Nº OS</th><th>Cliente</th><th>Equipamento</th><th>Data</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
-                <tbody id="ordersTable"></tbody>
-              </table>
-            </div>
-            <div class="empty-state" id="ordersEmpty"><div class="empty-icon">⌕</div><strong>Nenhuma OS encontrada</strong><p>Cadastre uma nova ordem ou altere os filtros.</p></div>
-          </div>
-        </section>
-
-        <!-- RELATÓRIOS -->
-        <section class="page" id="page-relatorios">
-          <div class="page-heading"><div><p class="eyebrow">DESEMPENHO</p><h1>Relatórios</h1><p class="muted">Resumo dos atendimentos registrados neste navegador.</p></div></div>
-          <div class="stats-grid">
-            <article class="stat-card"><span>Faturamento previsto*</span><strong id="reportTotal">R$ 0,00</strong><small>*Soma dos valores cadastrados, não representa pagamentos recebidos.</small></article>
-            <article class="stat-card"><span>Ticket médio</span><strong id="reportTicket">R$ 0,00</strong><small>Valor médio por OS</small></article>
-            <article class="stat-card"><span>Taxa de conclusão</span><strong id="reportRate">0%</strong><small>Ordens concluídas</small></article>
-            <article class="stat-card"><span>Aguardando peças</span><strong id="reportParts">0</strong><small>Ordens pendentes</small></article>
-          </div>
-          <div class="panel">
-            <div class="panel-heading"><div><h2>Exportar registros</h2><p class="muted">Baixe uma planilha CSV com os dados básicos das ordens.</p></div></div>
-            <button class="btn primary" id="exportCSV">↓ Exportar OS em CSV</button>
-          </div>
-        </section>
-
-        <!-- CONFIGURAÇÕES -->
-        <section class="page" id="page-configuracoes">
-          <div class="page-heading"><div><p class="eyebrow">PERSONALIZAÇÃO</p><h1>Configurações</h1><p class="muted">Personalize a identificação da assistência técnica.</p></div></div>
-          <div class="panel settings-panel">
-            <h2>Dados da PCVANCE</h2>
-            <p class="muted">Essas informações serão utilizadas na impressão das ordens.</p>
-            <form id="settingsForm">
-              <div class="form-grid">
-                <div class="field"><label>Nome da empresa</label><input id="empresaNome" value="PCVANCE"></div>
-                <div class="field"><label>Telefone comercial</label><input id="empresaTelefone" placeholder="WhatsApp comercial"></div>
-                <div class="field"><label>E-mail comercial</label><input id="empresaEmail" type="email" placeholder="contato@empresa.com"></div>
-                <div class="field"><label>Endereço comercial</label><input id="empresaEndereco" placeholder="Endereço da assistência"></div>
-              </div>
-              <button class="btn primary" type="submit">Salvar configurações</button>
-            </form>
-            <div class="danger-zone">
-              <h3>Dados locais</h3>
-              <p>Os registros ficam neste navegador. Apagar os dados é permanente neste dispositivo se não houver cópia de segurança.</p>
-              <button class="btn danger" id="clearData">Apagar todas as OS</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- DETALHES E IMPRESSÃO -->
-        <section class="page" id="page-detalhes">
-          <div class="page-heading no-print">
-            <div><p class="eyebrow">DOCUMENTO FINAL</p><h1>Visualizar ordem de serviço</h1><p class="muted">Revise os dados antes de imprimir ou salvar em PDF.</p></div>
-            <div class="heading-actions">
-              <button class="btn secondary" id="detailEdit">✎ Editar</button>
-              <button class="btn primary" id="printOS">↓ Baixar PDF / Imprimir</button>
-            </div>
-          </div>
-          <div id="printDocument" class="print-document"></div>
-        </section>
-
+    <section class="section process-section" id="processo">
+      <div class="section-heading">
+        <span class="eyebrow">SIMPLES DO INÍCIO AO FIM</span>
+        <h2>Como funciona o <span>atendimento?</span></h2>
+        <p>Você acompanha cada etapa e sabe o que esperar.</p>
       </div>
-      <footer class="footer">PCVANCE © <span id="year"></span> · Gestão de Ordens de Serviço</footer>
-    </main>
-  </div>
-  <div class="toast" id="toast"></div>
-  <script src="script.js"></script>
-<script>if(localStorage.getItem("pcvance_session_role")!=="admin"){location.replace("../acesso.html?area=admin")}document.getElementById("logoutButton")?.addEventListener("click",()=>{localStorage.removeItem("pcvance_session_role");localStorage.removeItem("pcvance_session_email");location.href="../acesso.html"});</script>
+      <div class="process-grid">
+        <article class="process-step"><span>01</span><i class="fa-regular fa-message"></i><h3>Conte o problema</h3><p>Explique o que acontece com seu computador e qual é sua necessidade.</p></article>
+        <article class="process-step"><span>02</span><i class="fa-solid fa-magnifying-glass-chart"></i><h3>Avaliação inicial</h3><p>Entendemos o cenário e indicamos a avaliação ou serviço adequado.</p></article>
+        <article class="process-step"><span>03</span><i class="fa-solid fa-clipboard-check"></i><h3>Orçamento</h3><p>Você recebe as informações do serviço e pode aprovar antes da execução.</p></article>
+        <article class="process-step"><span>04</span><i class="fa-solid fa-rocket"></i><h3>Hora de melhorar</h3><p>Com a aprovação, seguimos com o serviço combinado e orientações finais.</p></article>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="cta-inner">
+        <div><span class="eyebrow">SEU PC MERECE ATENÇÃO</span><h2>Vamos resolver isso juntos?</h2><p>Conte o que está acontecendo e receba orientação sobre o próximo passo.</p></div>
+        <a href="#contato" class="btn btn-light">Falar com a PCVance <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </section>
+
+    <section class="section contact-section" id="contato">
+      <div class="contact-copy">
+        <span class="eyebrow">FALE CONOSCO</span>
+        <h2>Solicite seu <span>orçamento.</span></h2>
+        <p>Preencha as informações abaixo. O site vai preparar uma mensagem para você enviar pelo WhatsApp.</p>
+        <div class="contact-note"><i class="fa-brands fa-whatsapp"></i><div><strong>Atendimento direto</strong><span>O formulário abre uma conversa com os detalhes preenchidos.</span></div></div>
+        <div class="contact-note"><i class="fa-solid fa-lock"></i><div><strong>Seus dados</strong><span>As informações ficam no seu navegador até você enviar a mensagem.</span></div></div>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <div class="form-row">
+          <label>Seu nome<input type="text" id="nome" name="nome" placeholder="Como podemos chamar você?" required maxlength="80"></label>
+          <label>Seu WhatsApp (opcional)<input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000"></label>
+        </div>
+        <label>Qual equipamento?
+          <select id="equipamento" name="equipamento" required>
+            <option value="">Selecione uma opção</option>
+            <option>Computador de mesa</option><option>Notebook</option><option>PC gamer</option><option>Outro equipamento</option>
+          </select>
+        </label>
+        <label>Qual serviço você precisa?
+          <select id="servico" name="servico" required>
+            <option value="">Selecione o serviço</option>
+            <option>Otimização de PC</option><option>Manutenção preventiva</option><option>Formatação e instalação</option><option>Upgrade de hardware</option><option>Diagnóstico de problemas</option><option>Suporte e orientação</option><option>Outro / ainda não sei</option>
+          </select>
+        </label>
+        <label>Conte um pouco mais<textarea id="mensagem" name="mensagem" rows="4" placeholder="Ex.: meu computador está lento ao iniciar..." required maxlength="1000"></textarea></label>
+        <button class="btn btn-primary submit-btn" type="submit">Preparar mensagem no WhatsApp <i class="fa-brands fa-whatsapp"></i></button>
+        <small class="form-help">Antes de publicar o site, configure o número de WhatsApp no arquivo <code>script.js</code>.</small>
+        <p class="form-feedback" id="formFeedback" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand footer-brand" href="#inicio"><span class="brand-icon"><i class="fa-solid fa-microchip"></i></span><span>PC<span>VANCE</span><small>ASSISTÊNCIA & PERFORMANCE</small></span></a>
+    <p>Assistência, cuidado e desempenho para sua tecnologia.</p>
+    <div class="footer-bottom"><span>© <span id="year"></span> PCVance. Todos os direitos reservados.</span><a href="#topo">Voltar ao topo ↑</a></div>
+  </footer>
+
+  <a class="floating-whatsapp" id="floatingWhatsapp" href="#contato" aria-label="Falar com a PCVance"><i class="fa-brands fa-whatsapp"></i></a>
 </body>
 </html>
