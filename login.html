@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <title>Entrar | PCVance</title>
+  <link rel="stylesheet" href="auth.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+  <main class="auth-wrap">
+    <a class="back" href="index.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao site</a>
+
+    <section class="auth-card">
+      <div class="brand">
+        <span class="brand-icon"><i class="fa-solid fa-microchip"></i></span>
+        <span>PC<span>VANCE</span><small>ASSISTÊNCIA & PERFORMANCE</small></span>
+      </div>
+
+      <!-- PRIMEIRO ACESSO: só aparece enquanto não existe administrador -->
+      <div id="setupPanel" class="hidden">
+        <h1>Primeiro acesso</h1>
+        <p class="sub">Ainda não existe administrador. Crie a conta que vai acessar o painel de Ordens de Serviço.</p>
+        <form id="setupForm" novalidate>
+          <label>Nome<input type="text" id="setupNome" autocomplete="name" required maxlength="80"></label>
+          <label>E-mail<input type="email" id="setupEmail" autocomplete="username" required></label>
+          <label>Senha (mín. 8 caracteres)
+            <span class="pass"><input type="password" id="setupSenha" autocomplete="new-password" required><button type="button" class="eye" data-eye="setupSenha" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span>
+          </label>
+          <label>Confirmar senha<input type="password" id="setupSenha2" autocomplete="new-password" required></label>
+          <button class="btn" type="submit">Criar administrador <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+      </div>
+
+      <!-- LOGIN / CADASTRO -->
+      <div id="authPanel" class="hidden">
+        <div class="tabs" role="tablist">
+          <button type="button" class="active" data-tab="login" role="tab">Entrar</button>
+          <button type="button" data-tab="register" role="tab">Criar conta</button>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <p class="sub">Administrador ou cliente: use o mesmo formulário. Você será levado à área correta.</p>
+          <label>E-mail<input type="email" id="loginEmail" autocomplete="username" required></label>
+          <label>Senha
+            <span class="pass"><input type="password" id="loginSenha" autocomplete="current-password" required><button type="button" class="eye" data-eye="loginSenha" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span>
+          </label>
+          <button class="btn" type="submit">Entrar <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+
+        <form id="registerForm" class="hidden" novalidate>
+          <p class="sub">Crie sua conta de cliente para acompanhar suas ordens de serviço e solicitar atendimento.</p>
+          <label>Nome completo<input type="text" id="regNome" autocomplete="name" required maxlength="80"></label>
+          <div class="row">
+            <label>E-mail<input type="email" id="regEmail" autocomplete="username" required></label>
+            <label>WhatsApp<input type="tel" id="regTelefone" autocomplete="tel" placeholder="(00) 00000-0000"></label>
+          </div>
+          <label>Senha (mín. 8 caracteres)
+            <span class="pass"><input type="password" id="regSenha" autocomplete="new-password" required><button type="button" class="eye" data-eye="regSenha" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span>
+          </label>
+          <label>Confirmar senha<input type="password" id="regSenha2" autocomplete="new-password" required></label>
+          <button class="btn" type="submit">Criar minha conta <i class="fa-solid fa-user-plus"></i></button>
+          <small class="hint">Use o mesmo e-mail ou WhatsApp informado no atendimento para ver suas OS.</small>
+        </form>
+      </div>
+
+      <p class="msg" id="authMsg" role="alert"></p>
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

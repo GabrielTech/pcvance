@@ -84,4 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Link flutuante leva ao formulário para que o contato seja preenchido corretamente
   const floatingWhatsapp = document.getElementById("floatingWhatsapp");
   if (floatingWhatsapp) floatingWhatsapp.href = "#contato";
+
+  // Se já estiver logado, o botão do menu vira "Minha área"
+  try {
+    const session = JSON.parse(sessionStorage.getItem("pcvance_session_v1") || "null");
+    const navLogin = document.getElementById("navLogin");
+    if (session && session.exp > Date.now() && navLogin) {
+      navLogin.href = session.role === "admin" ? "admin.html" : "cliente.html";
+      navLogin.innerHTML = '<i class="fa-solid fa-user"></i> Minha área';
+    }
+  } catch {}
 });

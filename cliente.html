@@ -1,1 +1,181 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Área do Cliente | PCVANCE</title><link rel="stylesheet" href="auth.css"><link rel="stylesheet" href="cliente.css"></head><body><main class="dashboard"><header><a class="brand" href="index.html"><span class="mark">PC</span><span><b>PCVANCE</b><small>ÁREA DO CLIENTE</small></span></a><button id="logout" class="logout">Sair</button></header><section class="welcome"><p class="eyebrow">PORTAL DO CLIENTE</p><h1>Olá, <span id="customerName">cliente</span>!</h1><p class="muted">Acompanhe as ordens de serviço associadas ao seu e-mail.</p></section><section class="panel"><div class="panel-head"><div><h2>Minhas ordens de serviço</h2><p class="muted">O status do atendimento é atualizado pela equipe técnica.</p></div><span class="count" id="count">0 ordens</span></div><div id="orders" class="orders"></div><div id="empty" class="empty"><b>Nenhuma ordem encontrada</b><p>Se você já deixou um equipamento para manutenção, confirme se o e-mail informado na ordem de serviço é o mesmo usado no cadastro.</p><a href="index.html#contato">Falar com a PCVANCE →</a></div></section><p class="notice">Este portal é uma versão inicial. Os dados do protótipo são guardados no navegador e não são sincronizados entre dispositivos.</p></main><script src="cliente.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d18">
+  <title>PCVANCE | Área do Cliente</title>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="cliente.css">
+  <script>document.documentElement.style.visibility = "hidden";</script>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-symbol">PC</div>
+        <div>
+          <h2>PCVANCE</h2>
+          <small>ÁREA DO CLIENTE</small>
+        </div>
+      </div>
+
+      <div class="nav-label">MINHA ÁREA</div>
+      <button class="nav-item active" data-page="ordens">▤ Minhas ordens</button>
+      <button class="nav-item" data-page="solicitar">＋ Solicitar serviço</button>
+      <button class="nav-item" data-page="perfil">☺ Meu perfil</button>
+
+      <div class="nav-label">OUTROS</div>
+      <a class="nav-item" href="index.html">↗ Voltar ao site</a>
+      <button class="nav-item logout" id="logoutBtn">⎋ Sair</button>
+
+      <div class="sidebar-footer">
+        <div class="status-dot"></div>
+        <div>
+          <strong>Conta ativa</strong>
+          <small id="sideEmail"></small>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+        <div>
+          <span class="breadcrumb">PCVANCE /</span>
+          <strong id="pageTitle">Minhas ordens</strong>
+        </div>
+        <div class="topbar-right">
+          <div class="user-chip"><strong id="userName"></strong><small>Cliente</small></div>
+          <div class="avatar" id="userAvatar">PC</div>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- MINHAS ORDENS -->
+        <section class="page active" id="page-ordens">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">ACOMPANHAMENTO</p>
+              <h1 id="welcome">Olá!</h1>
+              <p class="muted">Veja o andamento dos seus atendimentos na PCVANCE.</p>
+            </div>
+            <button class="btn primary" data-page="solicitar">＋ Solicitar serviço</button>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-icon blue">▤</div><span>Total de OS</span><strong id="cTotal">0</strong><small>Ordens vinculadas a você</small></article>
+            <article class="stat-card"><div class="stat-icon orange">◷</div><span>Em andamento</span><strong id="cAndamento">0</strong><small>Em análise ou execução</small></article>
+            <article class="stat-card"><div class="stat-icon purple">✓</div><span>Aguardando você</span><strong id="cAprovacao">0</strong><small>Orçamentos para aprovar</small></article>
+            <article class="stat-card"><div class="stat-icon green">✔</div><span>Concluídas</span><strong id="cConcluidas">0</strong><small>Serviços finalizados</small></article>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading"><div><h2>Minhas ordens de serviço</h2><p class="muted">Clique em “Ver” para abrir os detalhes.</p></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nº OS</th><th>Equipamento</th><th>Abertura</th><th>Previsão</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+                <tbody id="ordersTable"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="ordersEmpty">
+              <div class="empty-icon">▤</div>
+              <strong>Nenhuma ordem encontrada</strong>
+              <p>As OS aparecem aqui quando o e-mail ou WhatsApp do seu cadastro forem os mesmos do atendimento.</p>
+              <button class="btn primary" data-page="solicitar">Solicitar um serviço</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- DETALHE DA OS -->
+        <section class="page" id="page-detalhe">
+          <div class="page-heading">
+            <div><p class="eyebrow">DETALHES DO ATENDIMENTO</p><h1 id="detTitle">Ordem de serviço</h1><p class="muted" id="detSub"></p></div>
+            <button class="btn secondary" data-page="ordens">← Voltar</button>
+          </div>
+          <div id="detailBody"></div>
+        </section>
+
+        <!-- SOLICITAR SERVIÇO -->
+        <section class="page" id="page-solicitar">
+          <div class="page-heading">
+            <div><p class="eyebrow">NOVO ATENDIMENTO</p><h1>Solicitar serviço</h1><p class="muted">Conte o que está acontecendo. A PCVANCE analisa e entra em contato.</p></div>
+          </div>
+
+          <div class="panel settings-panel">
+            <form id="requestForm">
+              <div class="form-grid">
+                <div class="field"><label>Nome</label><input id="rqNome" readonly></div>
+                <div class="field"><label>WhatsApp para contato *</label><input id="rqTelefone" required placeholder="(00) 00000-0000"></div>
+                <div class="field"><label>Equipamento *</label>
+                  <select id="rqEquipamento" required>
+                    <option value="">Selecione</option>
+                    <option>Computador de mesa</option><option>Notebook</option><option>PC gamer</option><option>Outro equipamento</option>
+                  </select>
+                </div>
+                <div class="field"><label>Serviço *</label>
+                  <select id="rqServico" required>
+                    <option value="">Selecione</option>
+                    <option>Otimização de PC</option><option>Manutenção preventiva</option><option>Formatação e instalação</option><option>Upgrade de hardware</option><option>Diagnóstico de problemas</option><option>Suporte e orientação</option><option>Outro / ainda não sei</option>
+                  </select>
+                </div>
+                <div class="field span-2"><label>Descreva o problema *</label><textarea id="rqMensagem" rows="4" required maxlength="1000" placeholder="Ex.: meu computador está lento ao iniciar..."></textarea></div>
+              </div>
+              <button class="btn primary" type="submit">Enviar solicitação →</button>
+            </form>
+          </div>
+
+          <div class="panel" style="margin-top:18px">
+            <div class="panel-heading"><div><h2>Minhas solicitações</h2><p class="muted">Acompanhe os pedidos enviados.</p></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Data</th><th>Equipamento</th><th>Serviço</th><th>Situação</th><th></th></tr></thead>
+                <tbody id="requestsTable"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="requestsEmpty"><strong>Você ainda não enviou solicitações</strong><p>Use o formulário acima para pedir atendimento.</p></div>
+          </div>
+        </section>
+
+        <!-- PERFIL -->
+        <section class="page" id="page-perfil">
+          <div class="page-heading">
+            <div><p class="eyebrow">CONTA</p><h1>Meu perfil</h1><p class="muted">Mantenha seus dados atualizados para vincularmos suas OS.</p></div>
+          </div>
+
+          <div class="panel settings-panel">
+            <h2>Dados pessoais</h2>
+            <form id="profileForm">
+              <div class="form-grid">
+                <div class="field"><label>Nome completo</label><input id="pfNome" required maxlength="80"></div>
+                <div class="field"><label>WhatsApp</label><input id="pfTelefone" placeholder="(00) 00000-0000"></div>
+                <div class="field span-2"><label>E-mail (usado no login)</label><input id="pfEmail" readonly></div>
+              </div>
+              <button class="btn primary" type="submit">Salvar dados</button>
+            </form>
+          </div>
+
+          <div class="panel settings-panel" style="margin-top:18px">
+            <h2>Alterar senha</h2>
+            <form id="passwordForm">
+              <div class="form-grid">
+                <div class="field"><label>Senha atual</label><input type="password" id="pwdAtual" autocomplete="current-password" required></div>
+                <div class="field"><label>Nova senha (mín. 8)</label><input type="password" id="pwdNova" autocomplete="new-password" required></div>
+                <div class="field"><label>Confirmar nova senha</label><input type="password" id="pwdNova2" autocomplete="new-password" required></div>
+              </div>
+              <button class="btn primary" type="submit">Alterar senha</button>
+            </form>
+          </div>
+        </section>
+
+      </div>
+      <footer class="footer">PCVANCE © <span id="year"></span> · Área do Cliente</footer>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="cliente.js"></script>
+</body>
+</html>
