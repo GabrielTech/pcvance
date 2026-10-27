@@ -1,0 +1,21 @@
+PCVANCE — SITE + LOGIN + ORDENS DE SERVIÇO
+
+Arquivos:
+- index.html, style.css, script.js: site público original
+- acesso.html, auth.css, auth.js: login e seleção de perfil
+- cliente.html, cliente.css, cliente.js: área do cliente
+- admin/: sistema de ordens de serviço integrado
+
+ACESSO ADMINISTRATIVO DE DEMONSTRAÇÃO
+E-mail: admin@pcvance.com
+Senha: PcVance2026!
+
+IMPORTANTE SOBRE SEGURANÇA
+Este pacote é um protótipo front-end. A autenticação, contas e ordens usam localStorage no navegador; isso NÃO é seguro para produção, não sincroniza entre dispositivos e não protege dados contra alguém que tenha acesso ao navegador ou aos arquivos. Não publique informações reais de clientes nem use esta senha em produção. Para uso real, implemente backend, banco de dados, senhas com hash, sessões seguras e autorização por função. O login visual não substitui autenticação no servidor.
+
+Como testar:
+1. Extraia a pasta.
+2. Abra index.html ou rode a pasta por um servidor local (recomendado).
+3. Clique em “Área do cliente”.
+4. Para o administrador, escolha a aba Administrador e use as credenciais de demonstração.
+5. Cadastre uma conta de cliente e crie uma OS de teste usando o mesmo e-mail para que apareça no portal.

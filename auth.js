@@ -1,0 +1,11 @@
+const $=id=>document.getElementById(id);
+let role=new URLSearchParams(location.search).get("area")==="admin"?"admin":"cliente";
+let registering=false;
+function drawRole(){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===role));$("adminHint").classList.toggle("hidden",role!=="admin");$("registerToggle").classList.toggle("hidden",role==="admin"&&registering);$("nameWrap").classList.toggle("hidden",!registering||role!=="cliente");$("submitBtn").textContent=registering?"Criar conta de cliente":role==="admin"?"Entrar no painel administrativo":"Entrar na área do cliente";$("message").textContent="";}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{role=b.dataset.tab;registering=false;drawRole()}));
+$("registerToggle").addEventListener("click",()=>{registering=!registering;drawRole()});
+$("loginForm").addEventListener("submit",e=>{e.preventDefault();const email=$("email").value.trim().toLowerCase(),password=$("password").value;const users=JSON.parse(localStorage.getItem("pcvance_users")||"[]");
+if(role==="admin"){if(email==="admin@pcvance.com"&&password==="PcVance2026!"){localStorage.setItem("pcvance_session_role","admin");localStorage.setItem("pcvance_session_email",email);location.href="admin/index.html"}else $("message").textContent="E-mail ou senha administrativa incorretos.";return}
+if(registering){const name=$("name").value.trim();if(!name){$("message").textContent="Informe seu nome completo.";return}if(users.some(u=>u.email===email)){$("message").textContent="Já existe uma conta com este e-mail.";return}users.push({name,email,password});localStorage.setItem("pcvance_users",JSON.stringify(users));localStorage.setItem("pcvance_session_role","cliente");localStorage.setItem("pcvance_session_email",email);location.href="cliente.html";return}
+const user=users.find(u=>u.email===email&&u.password===password);if(!user){$("message").textContent="Dados incorretos ou conta não cadastrada. Verifique ou crie sua conta.";return}localStorage.setItem("pcvance_session_role","cliente");localStorage.setItem("pcvance_session_email",email);location.href="cliente.html";
+});drawRole();

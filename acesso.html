@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d18"><title>Acesso | PCVANCE</title><link rel="stylesheet" href="auth.css"></head>
+<body><main class="shell"><a class="brand" href="index.html"><span class="mark">PC</span><span><b>PCVANCE</b><small>ASSISTÊNCIA & PERFORMANCE</small></span></a>
+<section class="card"><a class="back" href="index.html">← Voltar ao site</a><p class="eyebrow">ÁREA EXCLUSIVA</p><h1>Acesse sua conta</h1><p class="muted">Entre como administrador ou cliente para continuar.</p>
+<div class="tabs"><button class="tab active" data-tab="cliente">Cliente</button><button class="tab" data-tab="admin">Administrador</button></div>
+<form id="loginForm"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required placeholder="voce@exemplo.com">
+<label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+<div id="nameWrap" class="hidden"><label for="name">Nome completo</label><input id="name" autocomplete="name" placeholder="Seu nome"></div>
+<button class="submit" type="submit" id="submitBtn">Entrar na área do cliente</button>
+<button class="switch" type="button" id="registerToggle">Ainda não tem conta? Criar cadastro</button><p class="message" id="message" role="status"></p></form>
+<div class="hint" id="adminHint">Acesso administrativo de demonstração: <b>admin@pcvance.com</b> / <b>PcVance2026!</b></div>
+<p class="disclaimer">Protótipo local: as contas ficam neste navegador. Antes de publicar, implemente autenticação e banco de dados no servidor.</p></section></main><script src="auth.js"></script></body></html>
