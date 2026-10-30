@@ -447,7 +447,7 @@ function renderPrintDocument(o) {
 
   $("printDocument").innerHTML = `
     <div class="print-header">
-      <div class="print-logo">PC</div>
+      <img class="print-logo" src="pcvance_logo.jpeg" alt="Logotipo PCVANCE">
       <div>
         <h1>${empresa}</h1>
         <p>ASSISTÊNCIA TÉCNICA · MANUTENÇÃO · OTIMIZAÇÃO</p>
