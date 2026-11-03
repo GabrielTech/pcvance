@@ -1,0 +1,13 @@
+{
+  "name": "pcvance",
+  "version": "1.0.0",
+  "description": "PCVance - Assistência técnica, manutenção e otimização de computadores e notebooks",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static site - no build required'",
+    "dev": "npx serve ."
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1"
+  }
+}
