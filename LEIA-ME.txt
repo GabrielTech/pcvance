@@ -1,21 +1,51 @@
 PCVANCE — SITE + LOGIN + ORDENS DE SERVIÇO
 
 Arquivos:
-- index.html, style.css, script.js: site público original
-- acesso.html, auth.css, auth.js: login e seleção de perfil
+- index.html, style.css, script.js: site público (orçamento via WhatsApp)
+- login.html, auth.css, auth.js, login.js: login, cadastro e verificação de e-mail
+- admin.html, admin.css, admin.js: painel de Ordens de Serviço (administrador)
 - cliente.html, cliente.css, cliente.js: área do cliente
-- admin/: sistema de ordens de serviço integrado
+- acesso.html: apenas redireciona para login.html
+- dashboard-os.*: arquivos antigos do painel (não usados pelo site atual)
 
-ACESSO ADMINISTRATIVO DE DEMONSTRAÇÃO
-E-mail: admin@pcvance.com
-Senha: PcVance2026!
+PRIMEIRO ACESSO
+Ao abrir login.html pela primeira vez, o sistema pede para criar a conta do administrador.
+Senha do administrador: mínimo 10 caracteres, com maiúsculas, minúsculas e números.
+Senha do cliente: mínimo 8 caracteres, com letras e números.
+
+O QUE FOI REFORÇADO NO LOGIN
+- Verificação de e-mail no cadastro: confere o formato, bloqueia e-mails temporários,
+  avisa erros comuns de digitação (ex.: gmial.com) e consulta se o domínio existe e recebe e-mails.
+- Confirmação por código de 6 dígitos enviado ao e-mail (precisa configurar o EmailJS, veja abaixo).
+- Bloqueio de tentativas por e-mail (5 erros = 1 min, dobrando a cada novo bloqueio, até 15 min).
+- Senhas fracas/comuns são recusadas.
+- Sessão do administrador dura 4 horas e fecha sozinha após 30 min sem uso.
+
+COMO ATIVAR O CÓDIGO POR E-MAIL (EmailJS, plano grátis)
+1. Crie uma conta em https://www.emailjs.com
+2. Em "Email Services", conecte o e-mail que vai enviar os códigos (ex.: Gmail). Copie o Service ID.
+3. Em "Email Templates", crie um template:
+   - Assunto: Seu código de verificação PCVANCE
+   - Campo "To email": {{to_email}}
+   - Mensagem: Olá, {{nome}}! Seu código de verificação é {{code}}. Ele vale por {{validade}}.
+   Copie o Template ID.
+4. Em "Account", copie a Public Key.
+5. Abra auth.js e preencha o bloco EMAILJS no topo (serviceId, templateId, publicKey).
+6. Em EmailJS > Security, limite o uso ao domínio do seu site.
+Enquanto o bloco estiver vazio, o cadastro usa apenas as checagens automáticas do e-mail.
+
+VALORES DA OS — "A DEFINIR"
+Em "Serviços e orçamento", cada item tem a caixa "A definir". Marcada, o valor do item fica para
+combinar com o cliente e não entra na soma. O total aparece como "A definir" (todos os itens) ou
+"R$ X + A definir" (alguns itens). Isso vale na lista, na impressão, no CSV e na área do cliente.
 
 IMPORTANTE SOBRE SEGURANÇA
-Este pacote é um protótipo front-end. A autenticação, contas e ordens usam localStorage no navegador; isso NÃO é seguro para produção, não sincroniza entre dispositivos e não protege dados contra alguém que tenha acesso ao navegador ou aos arquivos. Não publique informações reais de clientes nem use esta senha em produção. Para uso real, implemente backend, banco de dados, senhas com hash, sessões seguras e autorização por função. O login visual não substitui autenticação no servidor.
+Este pacote é um protótipo front-end. Contas e ordens ficam no localStorage do navegador: não sincroniza
+entre dispositivos e não protege contra quem tem acesso ao navegador ou aos arquivos. A confirmação por
+código também roda no navegador. Para uso real com dados de clientes, é preciso backend (ex.: PHP/MySQL),
+senhas com hash no servidor, sessões seguras e autorização por perfil.
 
 Como testar:
-1. Extraia a pasta.
-2. Abra index.html ou rode a pasta por um servidor local (recomendado).
-3. Clique em “Área do cliente”.
-4. Para o administrador, escolha a aba Administrador e use as credenciais de demonstração.
-5. Cadastre uma conta de cliente e crie uma OS de teste usando o mesmo e-mail para que apareça no portal.
+1. Extraia a pasta e rode por um servidor local (ex.: XAMPP) ou abra index.html.
+2. Clique em "Área do cliente" / login.html e crie o administrador.
+3. Cadastre uma conta de cliente e crie uma OS com o mesmo e-mail para aparecer no portal.

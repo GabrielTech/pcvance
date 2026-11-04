@@ -16,9 +16,19 @@ let toastTimer;
 let pendingRequestId = null;
 
 const BRL = new Intl.NumberFormat("pt-BR", {
+
   style: "currency",
   currency: "BRL"
 });
+
+/* Valor "A definir": o item fica sem preço para combinar com o cliente.
+   Ordens antigas (sem esse campo) continuam funcionando normalmente. */
+function tbdCount(o) { return (o.itens || []).filter(i => i && i.aDefinir).length; }
+function isAllTBD(o) { const n = (o.itens || []).length; return n > 0 && tbdCount(o) === n; }
+function totalLabel(o) {
+  if (isAllTBD(o)) return "A definir";
+  return tbdCount(o) ? `${BRL.format(Number(o.total) || 0)} + A definir` : BRL.format(Number(o.total) || 0);
+}
 
 function today() {
   const d = new Date();
@@ -215,7 +225,7 @@ function renderOrders() {
       <td>${escapeHTML(o.cliente)}</td>
       <td>${escapeHTML(o.tipoEquipamento)} · ${escapeHTML(o.marca || "—")}</td>
       <td>${formatDate(o.dataAbertura)}</td>
-      <td>${BRL.format(Number(o.total) || 0)}</td>
+      <td>${totalLabel(o)}</td>
       <td>${statusBadge(o.status)}</td>
       <td>
         <div class="row-actions">
@@ -237,11 +247,12 @@ $("sortOS").addEventListener("change", renderOrders);
 
 function renderReports() {
   const total = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const priced = orders.filter(o => !isAllTBD(o)).length; // OS 100% "A definir" ficam fora do ticket médio
   const completed = orders.filter(o => o.status === "Concluída").length;
   const waiting = orders.filter(o => o.status === "Aguardando peça").length;
 
   $("reportTotal").textContent = BRL.format(total);
-  $("reportTicket").textContent = BRL.format(orders.length ? total / orders.length : 0);
+  $("reportTicket").textContent = BRL.format(priced ? total / priced : 0);
   $("reportRate").textContent = `${orders.length ? Math.round(completed / orders.length * 100) : 0}%`;
   $("reportParts").textContent = waiting;
 }
@@ -251,7 +262,10 @@ function addItem(item = {}) {
   tr.innerHTML = `
     <td><input class="item-name" aria-label="Descrição do serviço ou peça" placeholder="Serviço ou peça" value="${escapeHTML(item.nome || "")}"></td>
     <td><input class="item-qty" aria-label="Quantidade" type="number" min="1" step="1" value="${Number(item.qtd) > 0 ? Number(item.qtd) : 1}"></td>
-    <td><input class="item-price" aria-label="Valor unitário" type="number" min="0" step="0.01" value="${Number(item.valor) >= 0 ? Number(item.valor) : 0}"></td>
+    <td class="price-cell">
+      <input class="item-price" aria-label="Valor unitário" type="number" min="0" step="0.01" value="${Number(item.valor) >= 0 ? Number(item.valor) : 0}">
+      <label class="tbd-check"><input type="checkbox" class="item-tbd" ${item.aDefinir ? "checked" : ""}> A definir</label>
+    </td>
     <td class="item-subtotal">R$ 0,00</td>
     <td><button type="button" class="icon-btn remove-item" aria-label="Remover item">×</button></td>
   `;
@@ -261,6 +275,7 @@ function addItem(item = {}) {
   tr.querySelectorAll(".item-qty, .item-price").forEach(input => {
     input.addEventListener("input", calculateTotal);
   });
+  tr.querySelector(".item-tbd").addEventListener("change", calculateTotal);
 
   tr.querySelector(".remove-item").addEventListener("click", () => {
     tr.remove();
@@ -274,23 +289,39 @@ function readItems() {
   return [...$("itemsBody").querySelectorAll("tr")].map(tr => ({
     nome: tr.querySelector(".item-name").value.trim(),
     qtd: Math.max(1, Number(tr.querySelector(".item-qty").value) || 1),
-    valor: Math.max(0, Number(tr.querySelector(".item-price").value) || 0)
+    aDefinir: tr.querySelector(".item-tbd").checked,
+    valor: tr.querySelector(".item-tbd").checked ? 0 : Math.max(0, Number(tr.querySelector(".item-price").value) || 0)
   })).filter(item => item.nome);
 }
 
 function calculateTotal() {
   let total = 0;
+  let rows = 0;
+  let tbd = 0;
 
   $("itemsBody").querySelectorAll("tr").forEach(tr => {
     const qtd = Math.max(1, Number(tr.querySelector(".item-qty").value) || 1);
-    const valor = Math.max(0, Number(tr.querySelector(".item-price").value) || 0);
-    const subtotal = qtd * valor;
+    const aDefinir = tr.querySelector(".item-tbd").checked;
+    const priceInput = tr.querySelector(".item-price");
+    priceInput.disabled = aDefinir;
+    rows++;
 
+    if (aDefinir) {
+      tbd++;
+      tr.querySelector(".item-subtotal").textContent = "A definir";
+      return;
+    }
+
+    const valor = Math.max(0, Number(priceInput.value) || 0);
+    const subtotal = qtd * valor;
     tr.querySelector(".item-subtotal").textContent = BRL.format(subtotal);
     total += subtotal;
   });
 
-  $("totalOrcamento").textContent = BRL.format(total);
+  $("totalOrcamento").textContent =
+    rows > 0 && tbd === rows ? "A definir" :
+    tbd ? `${BRL.format(total)} + A definir` :
+    BRL.format(total);
   return total;
 }
 
@@ -501,12 +532,12 @@ function renderPrintDocument(o) {
             <tr>
               <td>${escapeHTML(item.nome || "—")}</td>
               <td>${Number(item.qtd) || 1}</td>
-              <td>${BRL.format(Number(item.valor) || 0)}</td>
-              <td>${BRL.format((Number(item.qtd) || 1) * (Number(item.valor) || 0))}</td>
+              <td>${item.aDefinir ? "A definir" : BRL.format(Number(item.valor) || 0)}</td>
+              <td>${item.aDefinir ? "A definir" : BRL.format((Number(item.qtd) || 1) * (Number(item.valor) || 0))}</td>
             </tr>`).join("") : `<tr><td colspan="4">Nenhum item informado.</td></tr>`}
         </tbody>
       </table>
-      <div class="print-total">Total: ${BRL.format(Number(o.total) || 0)}</div>
+      <div class="print-total">Total: ${totalLabel(o)}</div>
       <div class="print-grid" style="margin-top:10px">
         ${field("Forma de pagamento", o.pagamento)}
         ${field("Aprovação do orçamento", o.aprovacao)}
@@ -625,7 +656,7 @@ function exportCSV() {
 
   const rows = orders.map(o => [
     o.numero, o.dataAbertura, o.cliente, o.telefone,
-    o.tipoEquipamento, o.marca, o.tecnico, o.status, o.aprovacao, o.total
+    o.tipoEquipamento, o.marca, o.tecnico, o.status, o.aprovacao, tbdCount(o) ? totalLabel(o) : o.total
   ]);
 
   const csvCell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;

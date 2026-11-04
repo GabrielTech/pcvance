@@ -8,6 +8,15 @@ if (!user) throw new Error("Acesso restrito.");
 const ORDERS_KEY = "pcvance_os_v1";
 const REQUESTS_KEY = "pcvance_requests_v1";
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+/* Valor "A definir": o item fica sem preço para combinar com o cliente.
+   Ordens antigas (sem esse campo) continuam funcionando normalmente. */
+function tbdCount(o) { return (o.itens || []).filter(i => i && i.aDefinir).length; }
+function isAllTBD(o) { const n = (o.itens || []).length; return n > 0 && tbdCount(o) === n; }
+function totalLabel(o) {
+  if (isAllTBD(o)) return "A definir";
+  return tbdCount(o) ? `${BRL.format(Number(o.total) || 0)} + A definir` : BRL.format(Number(o.total) || 0);
+}
 let toastTimer;
 
 function readList(key) {
@@ -87,7 +96,7 @@ function renderOrders() {
       <td>${escapeHTML(o.tipoEquipamento)} · ${escapeHTML(o.marca || "—")}</td>
       <td>${formatDate(o.dataAbertura)}</td>
       <td>${formatDate(o.dataPrevisao)}</td>
-      <td>${BRL.format(Number(o.total) || 0)}</td>
+      <td>${totalLabel(o)}</td>
       <td>${statusBadge(o.status)}</td>
       <td><button class="icon-btn" data-open="${escapeHTML(o.id)}">Ver</button></td>
     </tr>`).join("");
@@ -122,7 +131,7 @@ function openOrder(id) {
     <div class="detail-block"><h3>Serviços e peças</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Item</th><th>Qtd.</th><th>Valor unit.</th><th>Subtotal</th></tr></thead>
-        <tbody>${items.map((i) => `<tr><td>${escapeHTML(i.nome)}</td><td>${Number(i.qtd) || 1}</td><td>${BRL.format(Number(i.valor) || 0)}</td><td>${BRL.format((Number(i.qtd) || 1) * (Number(i.valor) || 0))}</td></tr>`).join("")}</tbody>
+        <tbody>${items.map((i) => `<tr><td>${escapeHTML(i.nome)}</td><td>${Number(i.qtd) || 1}</td><td>${i.aDefinir ? "A definir" : BRL.format(Number(i.valor) || 0)}</td><td>${i.aDefinir ? "A definir" : BRL.format((Number(i.qtd) || 1) * (Number(i.valor) || 0))}</td></tr>`).join("")}</tbody>
       </table></div>
     </div>` : "";
 
@@ -138,7 +147,7 @@ function openOrder(id) {
         ${item("Abertura", formatDate(o.dataAbertura))}
         ${item("Previsão de entrega", formatDate(o.dataPrevisao))}
         ${item("Técnico responsável", o.tecnico)}
-        ${item("Valor total", BRL.format(Number(o.total) || 0))}
+        ${item("Valor total", totalLabel(o))}
         ${item("Orçamento", o.aprovacao)}
         ${item("Forma de pagamento", o.pagamento || "A combinar")}
       </div>

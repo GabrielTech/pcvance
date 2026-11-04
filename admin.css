@@ -370,3 +370,11 @@ a.nav-item { display: block; text-decoration: none; }
 .user-chip small { color: var(--muted); font-size: 10px; }
 .req-msg { max-width: 260px; color: var(--muted); font-size: 12px; }
 @media (max-width: 720px) { .user-chip { display: none; } }
+
+/* Opção "A definir" nos valores da OS */
+.items-table { min-width: 680px; }
+.price-cell { min-width: 150px; }
+.tbd-check { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; font-weight: 600; color: #a5bfd9; cursor: pointer; }
+.tbd-check input { width: 15px; height: 15px; padding: 0; accent-color: #00c8ff; cursor: pointer; }
+.items-table .item-price:disabled { opacity: .4; cursor: not-allowed; }
+.item-subtotal { white-space: nowrap; }

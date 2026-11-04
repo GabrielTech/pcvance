@@ -28,7 +28,7 @@
         <form id="setupForm" novalidate>
           <label>Nome<input type="text" id="setupNome" autocomplete="name" required maxlength="80"></label>
           <label>E-mail<input type="email" id="setupEmail" autocomplete="username" required></label>
-          <label>Senha (mín. 8 caracteres)
+          <label>Senha (mín. 10 caracteres, com maiúsculas, minúsculas e números)
             <span class="pass"><input type="password" id="setupSenha" autocomplete="new-password" required><button type="button" class="eye" data-eye="setupSenha" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span>
           </label>
           <label>Confirmar senha<input type="password" id="setupSenha2" autocomplete="new-password" required></label>
@@ -59,12 +59,27 @@
             <label>E-mail<input type="email" id="regEmail" autocomplete="username" required></label>
             <label>WhatsApp<input type="tel" id="regTelefone" autocomplete="tel" placeholder="(00) 00000-0000"></label>
           </div>
-          <label>Senha (mín. 8 caracteres)
+          <label>Senha (mín. 8 caracteres, com letras e números)
             <span class="pass"><input type="password" id="regSenha" autocomplete="new-password" required><button type="button" class="eye" data-eye="regSenha" aria-label="Mostrar senha"><i class="fa-regular fa-eye"></i></button></span>
           </label>
           <label>Confirmar senha<input type="password" id="regSenha2" autocomplete="new-password" required></label>
           <button class="btn" type="submit">Criar minha conta <i class="fa-solid fa-user-plus"></i></button>
           <small class="hint">Use o mesmo e-mail ou WhatsApp informado no atendimento para ver suas OS.</small>
+        </form>
+      </div>
+
+      <!-- CONFIRMAÇÃO DE E-MAIL: aparece depois do cadastro, se o envio de código estiver ativado -->
+      <div id="codePanel" class="hidden">
+        <h1>Confirme seu e-mail</h1>
+        <p class="sub" id="codeSub">Enviamos um código de 6 dígitos para o seu e-mail.</p>
+        <form id="codeForm" novalidate>
+          <label>Código de verificação<input type="text" id="codeInput" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" class="code-input"></label>
+          <button class="btn" type="submit">Confirmar e-mail <i class="fa-solid fa-check"></i></button>
+          <div class="code-actions">
+            <button type="button" class="btn-link" id="codeResend">Reenviar código</button>
+            <button type="button" class="btn-link" id="codeCancel">Voltar</button>
+          </div>
+          <small class="hint">Não chegou? Veja também a caixa de spam. O código vale por 10 minutos.</small>
         </form>
       </div>
 

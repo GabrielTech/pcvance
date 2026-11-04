@@ -38,3 +38,10 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-colo
 .msg { min-height: 20px; margin: 16px 0 0; font-size: 13px; font-weight: 600; color: var(--err); }
 .msg.ok { color: var(--ok); }
 @media (max-width: 480px) { .row { grid-template-columns: 1fr; } .auth-card { padding: 26px 20px; } }
+
+/* Confirmação de e-mail por código */
+.code-input { text-align: center; font-size: 26px; font-weight: 800; letter-spacing: 10px; padding: 14px 10px; }
+.code-actions { display: flex; justify-content: space-between; gap: 10px; }
+.btn-link { border: 0; background: none; color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 2px; }
+.btn-link:hover { text-decoration: underline; }
+.btn-link:disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }

@@ -1,9 +1,8 @@
 /* PCVance — interações do site
-   IMPORTANTE: substitua o número abaixo pelo WhatsApp comercial.
-   Use código do país + DDD + número, somente dígitos.
+   Número de WhatsApp da empresa: código do país + DDD + número, somente dígitos.
    Exemplo de formato: 5587999999999
 */
-const PCVANCE_WHATSAPP = "5587999034059"; // TROQUE PELO NÚMERO REAL
+const PCVANCE_WHATSAPP = "5587999034059"; // WhatsApp comercial da PCVANCE
 
 document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.getElementById("menuToggle");
@@ -70,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const number = PCVANCE_WHATSAPP.replace(/\D/g, "");
       if (!number || number === "5587999999999") {
-        feedback.textContent = "O formulário está pronto, mas o número de WhatsApp ainda é um exemplo. Abra o script.js e configure PCVANCE_WHATSAPP com seu número real.";
+        feedback.textContent = "No momento não foi possível abrir o WhatsApp. Tente novamente em instantes ou entre em contato pelo telefone da PCVANCE.";
         feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
         return;
       }
