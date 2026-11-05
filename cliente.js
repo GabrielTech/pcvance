@@ -226,10 +226,10 @@ $("requestForm").addEventListener("submit", (e) => {
 });
 
 /* ---------- Perfil ---------- */
-$("profileForm").addEventListener("submit", (e) => {
+$("profileForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const updated = Auth.updateProfile(user.id, { nome: $("pfNome").value, telefone: $("pfTelefone").value });
+    const updated = await Auth.updateProfile(user.id, { nome: $("pfNome").value, telefone: $("pfTelefone").value });
     user.nome = updated.nome;
     user.telefone = updated.telefone;
     fillUser();

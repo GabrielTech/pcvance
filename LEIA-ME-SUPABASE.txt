@@ -1,0 +1,19 @@
+PCVANCE — INTEGRAÇÃO SUPABASE
+
+1) Faça backup do site atual.
+2) Extraia este ZIP e publique os arquivos mantendo os nomes e a estrutura.
+3) No Supabase > SQL Editor, execute o arquivo supabase-setup.sql. Ele não apaga sua tabela.
+4) Em Authentication > URL Configuration, configure Site URL e Redirect URLs para o domínio publicado.
+5) Em Authentication > Providers > Email, mantenha Email habilitado. Custom SMTP só é necessário para envio confiável de e-mails; configure host, porta, usuário, senha e remetente válidos.
+6) Cadastre uma conta pela tela Criar conta. Com confirmação de e-mail habilitada, confirme a mensagem antes de entrar.
+7) Verifique Authentication > Users e Table Editor > profiles. O trigger cria o perfil automaticamente.
+8) Para promover sua própria conta a administrador, depois de confirmar o e-mail e criar o perfil, execute no SQL Editor:
+   update public.profiles set tipo = 'admin' where email = 'SEU_EMAIL';
+   Troque SEU_EMAIL pelo endereço exato da conta. Não disponibilize essa ação no site público.
+
+IMPORTANTE:
+- Cadastros públicos sempre recebem tipo 'user'.
+- A chave sb_publishable no auth.js é pública e pode ficar no front-end. Nunca coloque service_role/secret key no navegador.
+- RLS limita a leitura/edição do perfil ao próprio usuário. O controle de acesso de dados de OS ainda precisa ser migrado para tabelas Supabase e políticas RLS próprias: este pacote não migra OS, solicitações, configurações ou anexos, que continuam no armazenamento local atual.
+- O cache local do perfil é usado apenas para direcionar a interface. Para dados sensíveis, a autorização real deve ser feita no banco com RLS.
+- O primeiro login após atualização deve ser feito novamente. Sessões antigas do sistema localStorage não são convertidas automaticamente.
