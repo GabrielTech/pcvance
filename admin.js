@@ -8,12 +8,12 @@ if (!currentUser) throw new Error("Acesso restrito.");
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "pcvance_os_v1";
 const SETTINGS_KEY = "pcvance_settings_v1";
-const REQUESTS_KEY = "pcvance_requests_v1";
 
 let orders = [];
 let currentDetailId = null;
 let toastTimer;
 let pendingRequestId = null;
+let serviceRequests = [];
 
 const BRL = new Intl.NumberFormat("pt-BR", {
 
@@ -43,14 +43,14 @@ function localOrdersBackup() {
 }
 
 function cloudRowToOrder(row) {
-  return { ...(row.dados || {}), id: row.id, numero: row.numero,
+  return { ...(row.dados || {}), id: row.id, numero: row.numero, clienteId: row.cliente_id || row.dados?.clienteId || null,
     criadoEm: row.dados?.criadoEm || row.created_at,
     atualizadoEm: row.updated_at };
 }
 
 async function refreshOrders() {
   const { data, error } = await Auth.sb.from("ordens_servico")
-    .select("id,numero,dados,created_by,created_at,updated_at")
+    .select("id,numero,dados,cliente_id,created_by,created_at,updated_at")
     .order("created_at", { ascending: false });
   if (error) throw new Error("Não foi possível carregar as OS: " + error.message);
   orders = (data || []).map(cloudRowToOrder);
@@ -91,7 +91,9 @@ async function initializeCloudOrders() {
 
 async function saveOrderCloud(order) {
   const existing = orders.some(o => o.id === order.id);
-  const payload = { id: order.id, numero: order.numero, dados: order,
+  const linkedRequest = pendingRequestId ? serviceRequests.find(r => r.id === pendingRequestId) : null;
+  if (linkedRequest) order.clienteId = linkedRequest.userId;
+  const payload = { id: order.id, numero: order.numero, dados: order, cliente_id: order.clienteId || null,
     updated_at: new Date().toISOString() };
   if (!existing) {
     payload.created_by = currentUser.id;
@@ -201,7 +203,7 @@ function goTo(page) {
   $("sidebar").classList.remove("open");
 
   if (["dashboard", "ordens", "relatorios"].includes(page)) refreshOrders().catch(err => showToast(err.message, true));
-  if (page === "solicitacoes") renderRequests();
+  if (page === "solicitacoes") renderRequests().catch(err => showToast(err.message, true));
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -436,6 +438,7 @@ function collectForm() {
     numero: previous?.numero || nextOSNumber(),
     criadoEm: previous?.criadoEm || new Date().toISOString(),
     atualizadoEm: new Date().toISOString(),
+    clienteId: previous?.clienteId || null,
 
     dataAbertura: $("dataAbertura").value,
     dataPrevisao: $("dataPrevisao").value,
@@ -487,7 +490,7 @@ $("osForm").addEventListener("submit", async event => {
     await saveOrderCloud(order);
     if (index >= 0) orders[index] = order; else orders.push(order);
     showToast(index >= 0 ? "Ordem atualizada na nuvem!" : "Ordem cadastrada na nuvem!");
-    if (index < 0) markRequestConverted(order);
+    if (index < 0 && pendingRequestId) await markRequestConverted(order);
     currentDetailId = order.id;
     renderDashboard(); renderOrders(); renderReports();
     openDetails(order.id);
@@ -740,39 +743,32 @@ $("passwordForm").addEventListener("submit", async (event) => {
   }
 });
 
-/* ===== Solicitações dos clientes ===== */
-function loadRequests() {
-  try {
-    const data = JSON.parse(localStorage.getItem(REQUESTS_KEY) || "[]");
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+/* ===== Solicitações dos clientes — sincronizadas pelo Supabase ===== */
+async function loadRequests() {
+  const { data, error } = await Auth.sb.from("solicitacoes_servico")
+    .select("id,user_id,dados,status,created_at,updated_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error("Não foi possível carregar as solicitações: " + error.message);
+  serviceRequests = (data || []).map(row => ({ ...(row.dados || {}), id: row.id, userId: row.user_id, status: row.status, criadoEm: row.dados?.criadoEm || row.created_at, updatedAt: row.updated_at }));
+  return serviceRequests;
 }
 
-function saveRequests(list) {
-  localStorage.setItem(REQUESTS_KEY, JSON.stringify(list));
-}
-
-function updateRequestBadge() {
-  const n = loadRequests().filter((r) => r.status === "Nova").length;
+async function updateRequestBadge() {
+  const n = serviceRequests.filter(r => r.status === "Nova").length;
   $("requestBadge").textContent = n;
   $("requestBadge").classList.toggle("hidden", n === 0);
 }
 
 function requestStatusBadge(r) {
-  if (r.status === "Convertida") return `<span class="badge green">${escapeHTML(r.osNumero || "Convertida")}</span>`;
+  if (r.status === "Convertida") return `<span class="badge green">OS ${escapeHTML(r.osNumero || "criada")}</span>`;
   if (r.status === "Arquivada") return `<span class="badge orange">Arquivada</span>`;
-  return `<span class="badge blue">Nova</span>`;
+  return `<span class="badge blue">Pendente de aprovação</span>`;
 }
 
-function renderRequests() {
+async function renderRequests() {
   const filter = $("filterRequests").value;
-  const list = loadRequests()
-    .filter((r) => !filter || r.status === filter)
-    .sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
-
-  $("requestsTable").innerHTML = list.map((r) => `
+  const list = (await loadRequests()).filter(r => !filter || r.status === filter);
+  $("requestsTable").innerHTML = list.map(r => `
     <tr>
       <td>${formatDate((r.criadoEm || "").slice(0, 10))}</td>
       <td><strong>${escapeHTML(r.nome)}</strong><br><span class="muted">${escapeHTML(r.telefone || r.email)}</span></td>
@@ -780,18 +776,14 @@ function renderRequests() {
       <td>${escapeHTML(r.servico)}</td>
       <td class="req-msg">${escapeHTML(r.mensagem)}</td>
       <td>${requestStatusBadge(r)}</td>
-      <td>
-        <div class="row-actions">
-          ${r.status === "Nova" ? `<button class="icon-btn" data-req-convert="${escapeHTML(r.id)}">Criar OS</button><button class="icon-btn" data-req-archive="${escapeHTML(r.id)}">Arquivar</button>` : ""}
-          <button class="icon-btn" data-req-delete="${escapeHTML(r.id)}">Excluir</button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-
+      <td><div class="row-actions">
+        ${r.status === "Nova" ? `<button class="icon-btn" data-req-convert="${escapeHTML(r.id)}">Aceitar / Criar OS</button><button class="icon-btn" data-req-archive="${escapeHTML(r.id)}">Recusar</button>` : ""}
+        <button class="icon-btn" data-req-delete="${escapeHTML(r.id)}">Excluir</button>
+      </div></td>
+    </tr>`).join("");
   $("requestsEmpty").classList.toggle("hidden", list.length > 0);
   $("requestsTable").closest(".table-wrap").classList.toggle("hidden", list.length === 0);
-  updateRequestBadge();
+  await updateRequestBadge();
 }
 
 function equipmentToOS(name) {
@@ -800,8 +792,9 @@ function equipmentToOS(name) {
   return "Outro";
 }
 
-function convertRequest(id) {
-  const r = loadRequests().find((x) => x.id === id);
+async function convertRequest(id) {
+  await loadRequests();
+  const r = serviceRequests.find((x) => x.id === id);
   if (!r) return;
   resetForm();
   pendingRequestId = id;
@@ -814,41 +807,45 @@ function convertRequest(id) {
   showToast("Dados da solicitação carregados. Complete e salve a OS.");
 }
 
-function markRequestConverted(order) {
+async function markRequestConverted(order) {
   if (!pendingRequestId) return;
-  const list = loadRequests();
-  const r = list.find((x) => x.id === pendingRequestId);
+  const r = serviceRequests.find(x => x.id === pendingRequestId);
   if (r) {
-    r.status = "Convertida";
-    r.osNumero = order.numero;
-    saveRequests(list);
+    const updatedData = { ...r, osNumero: order.numero };
+    const { error } = await Auth.sb.from("solicitacoes_servico").update({ status: "Convertida", dados: updatedData, updated_at: new Date().toISOString() }).eq("id", r.id);
+    if (error) throw new Error("A OS foi salva, mas não foi possível atualizar a solicitação: " + error.message);
   }
   pendingRequestId = null;
-  updateRequestBadge();
+  await renderRequests();
 }
 
-$("filterRequests").addEventListener("change", renderRequests);
+$("filterRequests").addEventListener("change", () => renderRequests().catch(err => showToast(err.message, true)));
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
   const convert = event.target.closest("[data-req-convert]");
   const archive = event.target.closest("[data-req-archive]");
   const remove = event.target.closest("[data-req-delete]");
-
-  if (convert) convertRequest(convert.dataset.reqConvert);
-
-  if (archive) {
-    const list = loadRequests();
-    const r = list.find((x) => x.id === archive.dataset.reqArchive);
-    if (r) { r.status = "Arquivada"; saveRequests(list); renderRequests(); }
-  }
-
-  if (remove) {
-    if (confirm("Excluir esta solicitação? Essa ação não pode ser desfeita.")) {
-      saveRequests(loadRequests().filter((x) => x.id !== remove.dataset.reqDelete));
-      renderRequests();
-      showToast("Solicitação excluída.");
+  try {
+    if (convert) await convertRequest(convert.dataset.reqConvert);
+    if (archive) {
+      const { error } = await Auth.sb.from("solicitacoes_servico").update({ status: "Arquivada", updated_at: new Date().toISOString() }).eq("id", archive.dataset.reqArchive);
+      if (error) throw error;
+      await renderRequests(); showToast("Solicitação recusada/arquivada.");
     }
-  }
+    if (remove && confirm("Excluir esta solicitação? Essa ação não pode ser desfeita.")) {
+      const { error } = await Auth.sb.from("solicitacoes_servico").delete().eq("id", remove.dataset.reqDelete);
+      if (error) throw error;
+      await renderRequests(); showToast("Solicitação excluída.");
+    }
+  } catch (err) { showToast(err.message || "Falha ao atualizar solicitação.", true); }
 });
 
-updateRequestBadge();
+loadRequests().then(updateRequestBadge).catch(err => showToast(err.message, true));
+window.addEventListener("focus", () => {
+  refreshOrders().catch(err => showToast(err.message, true));
+  if (document.getElementById("page-solicitacoes")?.classList.contains("active")) renderRequests().catch(err => showToast(err.message, true));
+});
+Auth.sb.channel("admin-solicitacoes")
+  .on("postgres_changes", { event: "*", schema: "public", table: "solicitacoes_servico" }, () => {
+    loadRequests().then(() => { updateRequestBadge(); if (document.getElementById("page-solicitacoes")?.classList.contains("active")) renderRequests(); }).catch(err => showToast(err.message, true));
+  }).subscribe();

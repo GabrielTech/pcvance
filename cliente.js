@@ -6,7 +6,6 @@ const user = Auth.requireRole("user");
 if (!user) throw new Error("Acesso restrito.");
 
 const ORDERS_KEY = "pcvance_os_v1";
-const REQUESTS_KEY = "pcvance_requests_v1";
 const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
 /* Valor "A definir": o item fica sem preço para combinar com o cliente.
@@ -20,12 +19,21 @@ function totalLabel(o) {
 let toastTimer;
 
 function readList(key) {
-  try {
-    const d = JSON.parse(localStorage.getItem(key) || "[]");
-    return Array.isArray(d) ? d : [];
-  } catch {
-    return [];
-  }
+  try { const d = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(d) ? d : []; }
+  catch { return []; }
+}
+let cloudOrders = [];
+let cloudRequests = [];
+async function loadClientData() {
+  const [ordersResult, requestsResult] = await Promise.all([
+    Auth.sb.from("ordens_servico").select("id,numero,dados,cliente_id,created_at,updated_at").eq("cliente_id", user.id).order("created_at", { ascending: false }),
+    Auth.sb.from("solicitacoes_servico").select("id,user_id,dados,status,created_at,updated_at").eq("user_id", user.id).order("created_at", { ascending: false })
+  ]);
+  if (ordersResult.error) throw new Error("Não foi possível carregar suas OS: " + ordersResult.error.message);
+  if (requestsResult.error) throw new Error("Não foi possível carregar suas solicitações: " + requestsResult.error.message);
+  cloudOrders = (ordersResult.data || []).map(row => ({ ...(row.dados || {}), id: row.id, numero: row.numero, clienteId: row.cliente_id, criadoEm: row.dados?.criadoEm || row.created_at, atualizadoEm: row.updated_at }));
+  cloudRequests = (requestsResult.data || []).map(row => ({ ...(row.dados || {}), id: row.id, userId: row.user_id, status: row.status, criadoEm: row.dados?.criadoEm || row.created_at, updatedAt: row.updated_at }));
+  renderOrders(); renderRequests();
 }
 
 function showToast(message, error = false) {
@@ -51,15 +59,7 @@ const statusBadge = (s) => `<span class="badge ${statusClass(s)}">${escapeHTML(s
 
 /* ---------- Vínculo OS ↔ cliente (e-mail ou final do WhatsApp) ---------- */
 function myOrders() {
-  const email = Auth.normEmail(user.email);
-  const phone = Auth.normPhone(user.telefone);
-  const tail = (s) => Auth.normPhone(s).slice(-9);
-  return readList(ORDERS_KEY)
-    .filter((o) =>
-      (o.email && Auth.normEmail(o.email) === email) ||
-      (phone.length >= 9 && tail(o.telefone).length >= 9 && tail(o.telefone) === tail(phone))
-    )
-    .sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+  return [...cloudOrders].sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
 }
 
 /* ---------- Navegação ---------- */
@@ -73,8 +73,7 @@ function goTo(page) {
   document.querySelectorAll(".nav-item[data-page]").forEach((b) => b.classList.toggle("active", b.dataset.page === page));
   $("pageTitle").textContent = titles[page] || "PCVANCE";
   $("sidebar").classList.remove("open");
-  if (page === "ordens") renderOrders();
-  if (page === "solicitar") renderRequests();
+  if (page === "ordens" || page === "solicitar") loadClientData().catch(err => showToast(err.message, true));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -165,16 +164,19 @@ document.addEventListener("click", (e) => {
   if (open) openOrder(open.dataset.open);
   const cancel = e.target.closest("[data-cancel]");
   if (cancel && confirm("Cancelar esta solicitação?")) {
-    const all = readList(REQUESTS_KEY);
-    localStorage.setItem(REQUESTS_KEY, JSON.stringify(all.filter((r) => !(r.id === cancel.dataset.cancel && r.userId === user.id && r.status === "Nova"))));
-    renderRequests();
-    showToast("Solicitação cancelada.");
+    (async () => {
+      const req = cloudRequests.find(r => r.id === cancel.dataset.cancel && r.status === "Nova");
+      if (!req) return;
+      const { error } = await Auth.sb.from("solicitacoes_servico").delete().eq("id", req.id).eq("user_id", user.id);
+      if (error) return showToast("Não foi possível cancelar: " + error.message, true);
+      await loadClientData(); showToast("Solicitação cancelada.");
+    })().catch(err => showToast(err.message, true));
   }
 });
 
 /* ---------- Solicitações ---------- */
 function myRequests() {
-  return readList(REQUESTS_KEY).filter((r) => r.userId === user.id).sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+  return [...cloudRequests].sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
 }
 
 function requestStatus(r) {
@@ -197,32 +199,20 @@ function renderRequests() {
   $("requestsTable").closest(".table-wrap").classList.toggle("hidden", list.length === 0);
 }
 
-$("requestForm").addEventListener("submit", (e) => {
+$("requestForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const request = {
-    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    userId: user.id,
-    nome: user.nome,
-    email: user.email,
-    telefone: $("rqTelefone").value.trim(),
-    equipamento: $("rqEquipamento").value,
-    servico: $("rqServico").value,
-    mensagem: $("rqMensagem").value.trim(),
-    criadoEm: new Date().toISOString(),
-    status: "Nova"
+    id: crypto.randomUUID(), userId: user.id, nome: user.nome, email: user.email,
+    telefone: $("rqTelefone").value.trim(), equipamento: $("rqEquipamento").value,
+    servico: $("rqServico").value, mensagem: $("rqMensagem").value.trim(),
+    criadoEm: new Date().toISOString()
   };
-  try {
-    const all = readList(REQUESTS_KEY);
-    all.push(request);
-    localStorage.setItem(REQUESTS_KEY, JSON.stringify(all));
-  } catch {
-    return showToast("Não foi possível enviar. Tente novamente.", true);
-  }
-  $("rqEquipamento").value = "";
-  $("rqServico").value = "";
-  $("rqMensagem").value = "";
-  renderRequests();
-  showToast("Solicitação enviada! A PCVANCE vai entrar em contato.");
+  const { error } = await Auth.sb.from("solicitacoes_servico").insert({
+    id: request.id, user_id: user.id, status: "Nova", dados: request
+  });
+  if (error) return showToast("Não foi possível enviar: " + error.message, true);
+  $("rqEquipamento").value = ""; $("rqServico").value = ""; $("rqMensagem").value = "";
+  await loadClientData(); showToast("Solicitação enviada! A PCVANCE já pode visualizá-la.");
 });
 
 /* ---------- Perfil ---------- */
@@ -266,5 +256,9 @@ function fillUser() {
 
 $("year").textContent = new Date().getFullYear();
 fillUser();
-renderOrders();
-renderRequests();
+loadClientData().catch(err => showToast(err.message, true));
+window.addEventListener("focus", () => loadClientData().catch(err => showToast(err.message, true)));
+Auth.sb.channel("cliente-atualizacoes-" + user.id)
+  .on("postgres_changes", { event: "*", schema: "public", table: "ordens_servico", filter: "cliente_id=eq." + user.id }, () => loadClientData().catch(err => showToast(err.message, true)))
+  .on("postgres_changes", { event: "*", schema: "public", table: "solicitacoes_servico", filter: "user_id=eq." + user.id }, () => loadClientData().catch(err => showToast(err.message, true)))
+  .subscribe();

@@ -1,0 +1,50 @@
+PCVANCE — ORDENS DE SERVIÇO NO SUPABASE
+
+O QUE FOI ALTERADO
+- As Ordens de Serviço passam a ser carregadas e salvas na tabela public.ordens_servico.
+- Cadastro, edição, exclusão, dashboard, relatórios e impressão continuam no painel admin.html.
+- Administradores e colaboradores autorizados podem consultar e gerenciar as OS.
+- As OS antigas armazenadas no navegador são importadas automaticamente na primeira abertura do painel após a instalação. O arquivo local original não é apagado.
+- Solicitações de serviço dos clientes também passam a ser salvas no Supabase, na tabela public.solicitacoes_servico.
+- O painel administrativo recebe as solicitações de todos os clientes; o cliente consulta somente as próprias solicitações e OS vinculadas à sua conta.
+- Ao aceitar uma solicitação e salvar a OS, o sistema vincula a OS ao usuário que fez o pedido e atualiza o status da solicitação.
+
+INSTALAÇÃO
+1. Faça uma cópia de segurança do site atual.
+2. No Supabase, abra SQL Editor.
+3. Confirme que o script supabase-setup.sql já foi executado anteriormente.
+4. Execute o conteúdo de supabase-os-setup.sql.
+5. Publique/substitua no site os arquivos atualizados admin.js, cliente.js, auth.js e supabase-os-setup.sql (o SQL é executado no Supabase, não publicado no site). Mantenha os demais arquivos e a estrutura de pastas.
+6. Saia e entre novamente no painel com a conta administradora e teste uma nova solicitação usando uma conta de cliente.
+7. Abra o painel administrativo > Solicitações. A nova solicitação deverá aparecer. Clique em “Aceitar / Criar OS”, complete os dados e salve.
+8. Entre novamente na conta do cliente: a solicitação aparecerá como em atendimento e a OS estará em “Minhas ordens”. As atualizações da OS são sincronizadas em tempo real quando o Supabase Realtime estiver habilitado; ao retornar à página, os dados também são recarregados.
+9. Abra o painel com o navegador que contém as OS antigas e aguarde o carregamento. A migração local é executada uma vez por navegador.
+
+CADASTRAR UM COLABORADOR
+1. O colaborador deve criar uma conta normalmente pela página de cadastro do site.
+2. No Supabase, abra Table Editor > profiles e confirme o e-mail cadastrado.
+3. No SQL Editor, execute, substituindo pelo e-mail correto:
+   update public.profiles set tipo = 'colaborador' where email = 'colaborador@exemplo.com';
+4. Peça ao colaborador para sair e entrar novamente. Ele será direcionado ao painel administrativo.
+
+PERMISSÕES
+- Contas com tipo admin ou colaborador podem visualizar, cadastrar, editar e excluir OS.
+- Contas comuns só podem consultar as OS vinculadas à própria conta e as próprias solicitações.
+- Contas comuns não podem consultar solicitações de outros clientes nem alterar o status de uma solicitação.
+- Nesta versão, colaborador e administrador têm as mesmas permissões no painel de OS.
+- A alteração de tipo de perfil deve ser feita somente pelo administrador do projeto no SQL Editor.
+
+IMPORTANTE SOBRE SOLICITAÇÕES ANTIGAS
+- Solicitações criadas na versão anterior ficaram gravadas somente no navegador do cliente e não podem aparecer automaticamente no painel administrativo. Peça que o cliente envie novamente qualquer solicitação antiga que ainda precise de atendimento.
+
+IMPORTANTE SOBRE A MIGRAÇÃO
+- A migração automática importa somente os registros locais do navegador em que o painel for aberto após a atualização.
+- Se houver OS antigas em outros computadores/navegadores, abra o painel atualizado em cada um deles com uma conta autorizada para importar esses registros também.
+- A importação usa o número da OS para evitar duplicações.
+- Não limpe os dados do navegador nem apague a chave pcvance_os_v1 antes de confirmar que todas as OS foram importadas e aparecem no painel compartilhado.
+
+SEGURANÇA
+O formulário atual possui um campo para senha de acesso ao equipamento. Evite armazenar senhas reais de clientes na OS. Se for indispensável realizar um teste com credencial temporária, combine com o cliente um método seguro e remova a informação após o serviço.
+
+OBSERVAÇÃO
+As alterações foram preparadas para o painel admin.html/admin.js, que é o painel usado pelo fluxo de autenticação atual. Os arquivos antigos dashboard-os.* foram mantidos sem alteração.
