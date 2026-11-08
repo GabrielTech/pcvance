@@ -1,6 +1,6 @@
 "use strict";
 
-// Só o administrador entra aqui (senão volta para o login)
+// Administradores e colaboradores autorizados acessam o painel de OS
 const currentUser = Auth.requireRole("admin");
 if (!currentUser) throw new Error("Acesso restrito.");
 
@@ -10,7 +10,7 @@ const STORAGE_KEY = "pcvance_os_v1";
 const SETTINGS_KEY = "pcvance_settings_v1";
 const REQUESTS_KEY = "pcvance_requests_v1";
 
-let orders = loadOrders();
+let orders = [];
 let currentDetailId = null;
 let toastTimer;
 let pendingRequestId = null;
@@ -35,17 +35,75 @@ function today() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function loadOrders() {
+function localOrdersBackup() {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
+  } catch { return []; }
+}
+
+function cloudRowToOrder(row) {
+  return { ...(row.dados || {}), id: row.id, numero: row.numero,
+    criadoEm: row.dados?.criadoEm || row.created_at,
+    atualizadoEm: row.updated_at };
+}
+
+async function refreshOrders() {
+  const { data, error } = await Auth.sb.from("ordens_servico")
+    .select("id,numero,dados,created_by,created_at,updated_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error("Não foi possível carregar as OS: " + error.message);
+  orders = (data || []).map(cloudRowToOrder);
+  renderDashboard(); renderOrders(); renderReports();
+}
+
+async function migrateLocalOrdersIfNeeded() {
+  const marker = "pcvance_os_migrated_v1";
+  if (localStorage.getItem(marker) === "1") return;
+  const legacy = localOrdersBackup();
+  if (!legacy.length) { localStorage.setItem(marker, "1"); return; }
+  const rows = legacy.map(o => {
+    const validUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(o.id || ""));
+    const id = validUUID ? o.id : crypto.randomUUID();
+    const migratedOrder = { ...o, id };
+    const parsedDate = o.criadoEm ? new Date(o.criadoEm) : new Date();
+    return { id, numero: o.numero, dados: migratedOrder,
+      created_by: currentUser.id,
+      created_at: Number.isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString(),
+      updated_at: new Date().toISOString() };
+  });
+  const { error } = await Auth.sb.from("ordens_servico").upsert(rows, { onConflict: "numero", ignoreDuplicates: true });
+  if (error) throw new Error("Falha ao migrar as OS deste navegador: " + error.message);
+  localStorage.setItem(marker, "1");
+  showToast(`${legacy.length} OS antigas verificadas para migração.`);
+}
+
+async function initializeCloudOrders() {
+  try {
+    await migrateLocalOrdersIfNeeded();
+    await refreshOrders();
+    if (!$('editId').value) $('osNumber').value = nextOSNumber();
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || "Erro ao conectar às Ordens de Serviço.", true);
   }
 }
 
-function saveOrders() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+async function saveOrderCloud(order) {
+  const existing = orders.some(o => o.id === order.id);
+  const payload = { id: order.id, numero: order.numero, dados: order,
+    updated_at: new Date().toISOString() };
+  if (!existing) {
+    payload.created_by = currentUser.id;
+    payload.created_at = new Date().toISOString();
+  }
+  const { error } = await Auth.sb.from("ordens_servico").upsert(payload, { onConflict: "id" });
+  if (error) throw new Error("Não foi possível salvar a OS: " + error.message);
+}
+
+async function deleteOrderCloud(id) {
+  const { error } = await Auth.sb.from("ordens_servico").delete().eq("id", id);
+  if (error) throw new Error("Não foi possível excluir a OS: " + error.message);
 }
 
 function loadSettings() {
@@ -142,9 +200,7 @@ function goTo(page) {
   $("pageTitle").textContent = titles[page] || "PCVANCE";
   $("sidebar").classList.remove("open");
 
-  if (page === "dashboard") renderDashboard();
-  if (page === "ordens") renderOrders();
-  if (page === "relatorios") renderReports();
+  if (["dashboard", "ordens", "relatorios"].includes(page)) refreshOrders().catch(err => showToast(err.message, true));
   if (page === "solicitacoes") renderRequests();
 
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -423,29 +479,19 @@ function collectForm() {
   };
 }
 
-$("osForm").addEventListener("submit", event => {
+$("osForm").addEventListener("submit", async event => {
   event.preventDefault();
-
   const order = collectForm();
   const index = orders.findIndex(o => o.id === order.id);
-
-  if (index >= 0) {
-    orders[index] = order;
-  } else {
-    orders.push(order);
-  }
-
   try {
-    saveOrders();
-  } catch {
-    showToast("Não foi possível salvar. O armazenamento pode estar cheio.", true);
-    return;
-  }
-
-  showToast(index >= 0 ? "Ordem atualizada!" : "Ordem cadastrada!");
-  if (index < 0) markRequestConverted(order);
-  currentDetailId = order.id;
-  openDetails(order.id);
+    await saveOrderCloud(order);
+    if (index >= 0) orders[index] = order; else orders.push(order);
+    showToast(index >= 0 ? "Ordem atualizada na nuvem!" : "Ordem cadastrada na nuvem!");
+    if (index < 0) markRequestConverted(order);
+    currentDetailId = order.id;
+    renderDashboard(); renderOrders(); renderReports();
+    openDetails(order.id);
+  } catch (err) { showToast(err.message, true); }
 });
 
 function openDetails(id) {
@@ -597,12 +643,11 @@ document.addEventListener("click", event => {
     if (!order) return;
 
     if (confirm(`Deseja excluir a ordem ${order.numero} de ${order.cliente}? Essa ação não pode ser desfeita.`)) {
-      orders = orders.filter(o => o.id !== order.id);
-      saveOrders();
-      renderOrders();
-      renderDashboard();
-      renderReports();
-      showToast("Ordem excluída.");
+      deleteOrderCloud(order.id).then(() => {
+        orders = orders.filter(o => o.id !== order.id);
+        renderOrders(); renderDashboard(); renderReports();
+        showToast("Ordem excluída da nuvem.");
+      }).catch(err => showToast(err.message, true));
     }
   }
 });
@@ -629,23 +674,16 @@ function loadSettingsIntoForm() {
   $("empresaEndereco").value = settings.endereco || "";
 }
 
-$("clearData").addEventListener("click", () => {
-  const confirmation = prompt(
-    'Esta ação apagará todas as OS deste navegador. Para confirmar, digite APAGAR.'
-  );
-
-  if (confirmation !== "APAGAR") {
-    showToast("Operação cancelada.");
-    return;
-  }
-
-  orders = [];
-  saveOrders();
-  renderDashboard();
-  renderOrders();
-  renderReports();
-  showToast("Ordens locais apagadas.");
-  goTo("dashboard");
+$("clearData").addEventListener("click", async () => {
+  const confirmation = prompt('Esta ação apagará permanentemente todas as OS do banco compartilhado. Para confirmar, digite APAGAR.');
+  if (confirmation !== "APAGAR") { showToast("Operação cancelada."); return; }
+  try {
+    const { error } = await Auth.sb.from("ordens_servico").delete().neq("numero", "");
+    if (error) throw error;
+    orders = []; renderDashboard(); renderOrders(); renderReports();
+    showToast("Todas as OS foram apagadas do banco compartilhado.");
+    goTo("dashboard");
+  } catch (err) { showToast("Não foi possível apagar as OS: " + err.message, true); }
 });
 
 function exportCSV() {
@@ -680,13 +718,13 @@ $("dataAbertura").value = today();
 $("osNumber").value = nextOSNumber();
 loadSettingsIntoForm();
 addItem();
-renderDashboard();
-renderOrders();
-renderReports();
+initializeCloudOrders();
+window.addEventListener("focus", () => refreshOrders().catch(err => showToast(err.message, true)));
 
 
 /* ===== Sessão ===== */
 $("userName").textContent = currentUser.nome;
+if ($("userRoleLabel")) $("userRoleLabel").textContent = currentUser.role === "colaborador" ? "Colaborador" : "Administrador";
 $("userAvatar").textContent = Auth.initials(currentUser.nome);
 $("logoutBtn").addEventListener("click", () => Auth.logout());
 

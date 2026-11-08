@@ -10,13 +10,14 @@ const Auth = (() => {
   const normEmail = e => String(e || "").trim().toLowerCase();
   const normPhone = p => String(p || "").replace(/\D/g, "");
   const initials = name => String(name || "?").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase() || "?";
-  const home = role => role === "admin" ? "admin.html" : "cliente.html";
+  const isStaff = role => role === "admin" || role === "colaborador";
+  const home = role => isStaff(role) ? "admin.html" : "cliente.html";
   function cacheProfile(p) { if (p) localStorage.setItem(CACHE, JSON.stringify(p)); }
   function cachedProfile() { try { return JSON.parse(localStorage.getItem(CACHE) || "null"); } catch { return null; } }
   async function profileFor(user) {
     const { data, error } = await sb.from("profiles").select("id,nome,email,telefone,tipo,created_at").eq("id", user.id).single();
     if (error) throw new Error("Conta autenticada, mas não foi possível carregar o perfil: " + error.message);
-    const p = { ...data, role: data.tipo === "admin" ? "admin" : "user" };
+    const p = { ...data, role: isStaff(data.tipo) ? data.tipo : "user" };
     cacheProfile(p); return p;
   }
   async function registerUser({nome,email,telefone,senha}) {
@@ -49,7 +50,7 @@ const Auth = (() => {
   function requireRole(role) {
     const p = cachedProfile();
     if (!p) { location.replace("login.html"); return null; }
-    if (p.role !== role) { location.replace(home(p.role)); return null; }
+    if (role === "admin" ? !isStaff(p.role) : p.role !== role) { location.replace(home(p.role)); return null; }
     document.documentElement.style.visibility = "visible";
     return p;
   }
@@ -58,7 +59,7 @@ const Auth = (() => {
     nome = String(nome || "").trim(); if (nome.length < 2) throw new Error("Informe seu nome.");
     const {data,error} = await sb.from("profiles").update({nome,telefone:String(telefone||"").trim()}).eq("id",id).select().single();
     if(error) throw new Error(error.message);
-    const p={...data,role:data.tipo === "admin" ? "admin":"user"}; cacheProfile(p); return p;
+    const p={...data,role:isStaff(data.tipo) ? data.tipo:"user"}; cacheProfile(p); return p;
   }
   async function changePassword(id, atual, nova) {
     if (String(nova||"").length < 8 || !/[A-Za-z]/.test(nova) || !/\d/.test(nova)) throw new Error("A nova senha deve ter pelo menos 8 caracteres e conter letras e números.");
