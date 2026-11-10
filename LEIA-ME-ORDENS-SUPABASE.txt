@@ -48,3 +48,11 @@ O formulário atual possui um campo para senha de acesso ao equipamento. Evite a
 
 OBSERVAÇÃO
 As alterações foram preparadas para o painel admin.html/admin.js, que é o painel usado pelo fluxo de autenticação atual. Os arquivos antigos dashboard-os.* foram mantidos sem alteração.
+
+
+ATUALIZAÇÃO — CONCLUSÃO DE OS E PROPOSTAS DE ORÇAMENTO
+- No painel administrativo > Gerenciar OS, cada OS ainda não concluída possui o botão "Concluir". Ao confirmar, o status passa para "Concluída" no Supabase e a dashboard do cliente reflete a atualização.
+- O painel administrativo possui a área "Propostas de orçamento". Selecione um cliente já cadastrado, informe título, valor, validade e descrição e envie.
+- A proposta aparece na área do cliente > Propostas de orçamento. O cliente pode aprovar ou recusar; a resposta fica registrada no painel administrativo.
+- A tabela public.propostas_orcamento e as permissões necessárias são criadas pelo SQL atualizado supabase-os-setup.sql. Execute o script completo no SQL Editor antes de publicar os arquivos.
+- O logotipo pcvance_logo.jpeg é utilizado no site principal, login, painel administrativo e área do cliente. Mantenha o arquivo junto aos HTMLs.

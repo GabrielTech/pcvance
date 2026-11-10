@@ -17,3 +17,17 @@
 .settings-panel form { margin-top: 14px; }
 .settings-panel .btn { margin-top: 16px; }
 @media (max-width: 560px) { .tracker { grid-template-columns: repeat(2, 1fr); } }
+
+.proposal-list { display:grid; gap:16px; }
+.proposal-card { padding:22px; }
+.proposal-card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.proposal-card h2 { margin:7px 0 12px; font-size:18px; }
+.proposal-card > p { color:#d6e0f0; line-height:1.65; white-space:pre-wrap; }
+.proposal-meta { display:flex; gap:36px; flex-wrap:wrap; border-top:1px solid var(--border); margin-top:18px; padding-top:16px; }
+.proposal-meta small,.proposal-meta strong { display:block; }
+.proposal-meta small { color:var(--muted); font-size:10px; letter-spacing:1px; margin-bottom:5px; }
+.proposal-meta strong { font-size:16px; }
+.proposal-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+.proposal-response { margin-top:16px !important; }
+.brand-symbol { object-fit:contain !important; }
+@media(max-width:560px) { .proposal-card-head { flex-direction:column; } }

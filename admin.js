@@ -196,6 +196,7 @@ function goTo(page) {
     solicitacoes: "Solicitações",
     relatorios: "Relatórios",
     configuracoes: "Configurações",
+    propostas: "Propostas de orçamento",
     detalhes: "Visualizar ordem de serviço"
   };
 
@@ -204,6 +205,7 @@ function goTo(page) {
 
   if (["dashboard", "ordens", "relatorios"].includes(page)) refreshOrders().catch(err => showToast(err.message, true));
   if (page === "solicitacoes") renderRequests().catch(err => showToast(err.message, true));
+  if (page === "propostas") loadProposals().catch(err => showToast(err.message, true));
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -289,6 +291,7 @@ function renderOrders() {
         <div class="row-actions">
           <button class="icon-btn" data-view="${escapeHTML(o.id)}" title="Visualizar">Ver</button>
           <button class="icon-btn" data-edit="${escapeHTML(o.id)}" title="Editar">Editar</button>
+          ${o.status !== "Concluída" ? `<button class="icon-btn" data-complete="${escapeHTML(o.id)}" title="Marcar como concluída">Concluir</button>` : ""}
           <button class="icon-btn" data-delete="${escapeHTML(o.id)}" title="Excluir">Excluir</button>
         </div>
       </td>
@@ -634,7 +637,17 @@ document.addEventListener("click", event => {
   const viewBtn = event.target.closest("[data-view]");
   const editBtn = event.target.closest("[data-edit]");
   const deleteBtn = event.target.closest("[data-delete]");
+  const completeBtn = event.target.closest("[data-complete]");
 
+  if (completeBtn) {
+    const order = orders.find(o => o.id === completeBtn.dataset.complete);
+    if (order && confirm(`Marcar a OS ${order.numero} como Concluída?`)) {
+      order.status = "Concluída";
+      order.atualizadoEm = new Date().toISOString();
+      saveOrderCloud(order).then(() => refreshOrders()).then(() => showToast(`OS ${order.numero} marcada como concluída.`))
+        .catch(err => showToast(err.message, true));
+    }
+  }
   if (viewBtn) openDetails(viewBtn.dataset.view);
   if (editBtn) {
     const order = orders.find(o => o.id === editBtn.dataset.edit);
@@ -715,6 +728,77 @@ function exportCSV() {
 }
 
 $("exportCSV").addEventListener("click", exportCSV);
+
+/* ===== Propostas de orçamento compartilhadas ===== */
+let proposalClients = [];
+let proposals = [];
+const proposalMoney = value => BRL.format(Number(value) || 0);
+
+async function loadProposalClients() {
+  const { data, error } = await Auth.sb.from("profiles")
+    .select("id,nome,email,telefone").eq("tipo", "user").order("nome");
+  if (error) throw new Error("Não foi possível carregar os clientes: " + error.message);
+  proposalClients = data || [];
+  $("proposalClient").innerHTML = '<option value="">Selecione um cliente</option>' +
+    proposalClients.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.nome || c.email)} — ${escapeHTML(c.email)}</option>`).join("");
+}
+
+function proposalBadge(status) {
+  const cls = status === "Aprovada" ? "green" : status === "Recusada" ? "red" : "purple";
+  return `<span class="badge ${cls}">${escapeHTML(status || "Enviada")}</span>`;
+}
+
+async function loadProposals() {
+  await loadProposalClients();
+  const {data,error} = await Auth.sb.from("propostas_orcamento")
+    .select("id,client_id,dados,status,created_at,updated_at")
+    .order("created_at", {ascending:false});
+  if (error) throw new Error("Não foi possível carregar propostas: " + error.message);
+  proposals = data || [];
+  $("proposalsTable").innerHTML = proposals.map(p => {
+    const c = proposalClients.find(x => x.id === p.client_id);
+    const d = p.dados || {};
+    return `<tr><td>${formatDate((p.created_at || "").slice(0,10))}</td>
+      <td><strong>${escapeHTML(c?.nome || "Cliente")}</strong><br><span class="muted">${escapeHTML(c?.email || "")}</span></td>
+      <td>${escapeHTML(d.titulo || "Orçamento")}</td><td>${proposalMoney(d.valor)}</td>
+      <td>${formatDate(d.validade)}</td><td>${proposalBadge(p.status)}</td>
+      <td>${p.status === "Enviada" ? `<button class="icon-btn" data-proposal-cancel="${escapeHTML(p.id)}">Cancelar</button>` : ""}</td></tr>`;
+  }).join("");
+  $("proposalsEmpty").classList.toggle("hidden", proposals.length > 0);
+  $("proposalsTable").closest(".table-wrap").classList.toggle("hidden", proposals.length === 0);
+}
+
+$("proposalForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const clientId = $("proposalClient").value;
+  const client = proposalClients.find(c => c.id === clientId);
+  if (!client) return showToast("Selecione um cliente cadastrado.", true);
+  const proposal = {
+    titulo: $("proposalTitle").value.trim(),
+    descricao: $("proposalDescription").value.trim(),
+    valor: Number($("proposalValue").value),
+    validade: $("proposalValid").value || null,
+    clienteNome: client.nome,
+    criadoEm: new Date().toISOString()
+  };
+  if (!Number.isFinite(proposal.valor) || proposal.valor < 0) return showToast("Informe um valor válido.", true);
+  const {error} = await Auth.sb.from("propostas_orcamento").insert({
+    client_id: client.id, created_by: currentUser.id, dados: proposal, status: "Enviada"
+  });
+  if (error) return showToast("Não foi possível enviar a proposta: " + error.message, true);
+  e.target.reset();
+  await loadProposals();
+  showToast("Proposta enviada para a dashboard do cliente!");
+});
+
+document.addEventListener("click", async event => {
+  const cancel = event.target.closest("[data-proposal-cancel]");
+  if (!cancel || !confirm("Cancelar esta proposta?")) return;
+  const {error} = await Auth.sb.from("propostas_orcamento").delete().eq("id", cancel.dataset.proposalCancel);
+  if (error) return showToast("Não foi possível cancelar: " + error.message, true);
+  await loadProposals();
+  showToast("Proposta cancelada.");
+});
 
 $("year").textContent = new Date().getFullYear();
 $("dataAbertura").value = today();
@@ -848,4 +932,9 @@ window.addEventListener("focus", () => {
 Auth.sb.channel("admin-solicitacoes")
   .on("postgres_changes", { event: "*", schema: "public", table: "solicitacoes_servico" }, () => {
     loadRequests().then(() => { updateRequestBadge(); if (document.getElementById("page-solicitacoes")?.classList.contains("active")) renderRequests(); }).catch(err => showToast(err.message, true));
+  }).subscribe();
+
+Auth.sb.channel("admin-propostas")
+  .on("postgres_changes", {event:"*", schema:"public", table:"propostas_orcamento"}, () => {
+    if ($("page-propostas")?.classList.contains("active")) loadProposals().catch(err => showToast(err.message,true));
   }).subscribe();

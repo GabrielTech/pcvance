@@ -24,6 +24,7 @@ function readList(key) {
 }
 let cloudOrders = [];
 let cloudRequests = [];
+let cloudProposals = [];
 async function loadClientData() {
   const [ordersResult, requestsResult] = await Promise.all([
     Auth.sb.from("ordens_servico").select("id,numero,dados,cliente_id,created_at,updated_at").eq("cliente_id", user.id).order("created_at", { ascending: false }),
@@ -31,9 +32,12 @@ async function loadClientData() {
   ]);
   if (ordersResult.error) throw new Error("Não foi possível carregar suas OS: " + ordersResult.error.message);
   if (requestsResult.error) throw new Error("Não foi possível carregar suas solicitações: " + requestsResult.error.message);
+  const proposalsResult = await Auth.sb.from("propostas_orcamento").select("id,client_id,dados,status,created_at,updated_at").eq("client_id", user.id).order("created_at", { ascending: false });
+  if (proposalsResult.error) throw new Error("Não foi possível carregar seus orçamentos: " + proposalsResult.error.message);
+  cloudProposals = proposalsResult.data || [];
   cloudOrders = (ordersResult.data || []).map(row => ({ ...(row.dados || {}), id: row.id, numero: row.numero, clienteId: row.cliente_id, criadoEm: row.dados?.criadoEm || row.created_at, atualizadoEm: row.updated_at }));
   cloudRequests = (requestsResult.data || []).map(row => ({ ...(row.dados || {}), id: row.id, userId: row.user_id, status: row.status, criadoEm: row.dados?.criadoEm || row.created_at, updatedAt: row.updated_at }));
-  renderOrders(); renderRequests();
+  renderOrders(); renderRequests(); renderProposals();
 }
 
 function showToast(message, error = false) {
@@ -63,7 +67,7 @@ function myOrders() {
 }
 
 /* ---------- Navegação ---------- */
-const titles = { ordens: "Minhas ordens", detalhe: "Detalhes da OS", solicitar: "Solicitar serviço", perfil: "Meu perfil" };
+const titles = { ordens: "Minhas ordens", detalhe: "Detalhes da OS", solicitar: "Solicitar serviço", propostas: "Propostas de orçamento", perfil: "Meu perfil" };
 
 function goTo(page) {
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
@@ -73,7 +77,7 @@ function goTo(page) {
   document.querySelectorAll(".nav-item[data-page]").forEach((b) => b.classList.toggle("active", b.dataset.page === page));
   $("pageTitle").textContent = titles[page] || "PCVANCE";
   $("sidebar").classList.remove("open");
-  if (page === "ordens" || page === "solicitar") loadClientData().catch(err => showToast(err.message, true));
+  if (["ordens", "solicitar", "propostas"].includes(page)) loadClientData().catch(err => showToast(err.message, true));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -215,6 +219,41 @@ $("requestForm").addEventListener("submit", async (e) => {
   await loadClientData(); showToast("Solicitação enviada! A PCVANCE já pode visualizá-la.");
 });
 
+/* ---------- Propostas de orçamento ---------- */
+function renderProposals() {
+  const list = [...cloudProposals].sort((a,b) => (b.created_at || "").localeCompare(a.created_at || ""));
+  const pending = list.filter(p => p.status === "Enviada").length;
+  const badge = $("proposalClientBadge");
+  badge.textContent = pending;
+  badge.classList.toggle("hidden", pending === 0);
+  $("clientProposalsList").innerHTML = list.map(p => {
+    const d = p.dados || {};
+    const canRespond = p.status === "Enviada";
+    const cls = p.status === "Aprovada" ? "green" : p.status === "Recusada" ? "red" : "purple";
+    return `<article class="panel proposal-card">
+      <div class="proposal-card-head"><div><span class="eyebrow">PROPOSTA · ${formatDate((p.created_at || "").slice(0,10))}</span><h2>${escapeHTML(d.titulo || "Orçamento PCVANCE")}</h2></div>
+      <span class="badge ${cls}">${escapeHTML(p.status)}</span></div>
+      <p>${escapeHTML(d.descricao || "")}</p>
+      <div class="proposal-meta"><div><small>VALOR TOTAL</small><strong>${BRL.format(Number(d.valor) || 0)}</strong></div><div><small>VALIDADE</small><strong>${formatDate(d.validade)}</strong></div></div>
+      ${canRespond ? `<div class="proposal-actions"><button class="btn primary" data-proposal-respond="Aprovada" data-proposal-id="${escapeHTML(p.id)}">Aprovar proposta</button><button class="btn secondary" data-proposal-respond="Recusada" data-proposal-id="${escapeHTML(p.id)}">Recusar</button></div>` : `<p class="muted proposal-response">Resposta registrada: ${escapeHTML(p.status)}.</p>`}
+    </article>`;
+  }).join("");
+  $("clientProposalsEmpty").classList.toggle("hidden", list.length > 0);
+}
+
+document.addEventListener("click", async e => {
+  const button = e.target.closest("[data-proposal-respond]");
+  if (!button) return;
+  const status = button.dataset.proposalRespond;
+  if (!confirm(`Deseja ${status === "Aprovada" ? "aprovar" : "recusar"} esta proposta?`)) return;
+  const {error} = await Auth.sb.from("propostas_orcamento")
+    .update({status, updated_at:new Date().toISOString()})
+    .eq("id", button.dataset.proposalId).eq("client_id", user.id).eq("status", "Enviada");
+  if (error) return showToast("Não foi possível registrar sua resposta: " + error.message, true);
+  await loadClientData();
+  showToast(status === "Aprovada" ? "Proposta aprovada! A PCVANCE foi notificada." : "Proposta recusada.");
+});
+
 /* ---------- Perfil ---------- */
 $("profileForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -261,4 +300,5 @@ window.addEventListener("focus", () => loadClientData().catch(err => showToast(e
 Auth.sb.channel("cliente-atualizacoes-" + user.id)
   .on("postgres_changes", { event: "*", schema: "public", table: "ordens_servico", filter: "cliente_id=eq." + user.id }, () => loadClientData().catch(err => showToast(err.message, true)))
   .on("postgres_changes", { event: "*", schema: "public", table: "solicitacoes_servico", filter: "user_id=eq." + user.id }, () => loadClientData().catch(err => showToast(err.message, true)))
+  .on("postgres_changes", { event: "*", schema: "public", table: "propostas_orcamento", filter: "client_id=eq." + user.id }, () => loadClientData().catch(err => showToast(err.message, true)))
   .subscribe();

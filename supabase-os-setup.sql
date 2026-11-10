@@ -160,3 +160,72 @@ exception when duplicate_object then
 when undefined_object then
   raise notice 'Publication supabase_realtime não encontrada; as telas ainda atualizarão ao abrir/retornar à página.';
 end $$;
+
+
+-- ===== Propostas de orçamento enviadas pela equipe ao cliente =====
+create table if not exists public.propostas_orcamento (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references auth.users(id) on delete cascade,
+  created_by uuid references auth.users(id) on delete set null,
+  dados jsonb not null default '{}'::jsonb,
+  status text not null default 'Enviada'
+    check (status in ('Enviada','Aprovada','Recusada')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists propostas_orcamento_client_id_idx
+  on public.propostas_orcamento (client_id, created_at desc);
+
+alter table public.propostas_orcamento enable row level security;
+
+drop policy if exists "Equipe consulta propostas" on public.propostas_orcamento;
+create policy "Equipe consulta propostas"
+  on public.propostas_orcamento for select to authenticated
+  using ((select public.pcvance_is_staff()));
+
+drop policy if exists "Cliente consulta suas propostas" on public.propostas_orcamento;
+create policy "Cliente consulta suas propostas"
+  on public.propostas_orcamento for select to authenticated
+  using (client_id = (select auth.uid()));
+
+drop policy if exists "Equipe cria propostas" on public.propostas_orcamento;
+create policy "Equipe cria propostas"
+  on public.propostas_orcamento for insert to authenticated
+  with check ((select public.pcvance_is_staff()) and created_by = (select auth.uid()));
+
+drop policy if exists "Equipe exclui propostas" on public.propostas_orcamento;
+create policy "Equipe exclui propostas"
+  on public.propostas_orcamento for delete to authenticated
+  using ((select public.pcvance_is_staff()));
+
+drop policy if exists "Equipe atualiza status das propostas" on public.propostas_orcamento;
+create policy "Equipe atualiza status das propostas"
+  on public.propostas_orcamento for update to authenticated
+  using ((select public.pcvance_is_staff()))
+  with check ((select public.pcvance_is_staff()));
+
+drop policy if exists "Cliente responde proposta recebida" on public.propostas_orcamento;
+create policy "Cliente responde proposta recebida"
+  on public.propostas_orcamento for update to authenticated
+  using (client_id = (select auth.uid()) and status = 'Enviada')
+  with check (client_id = (select auth.uid()) and status in ('Aprovada','Recusada'));
+
+grant select, insert, delete on public.propostas_orcamento to authenticated;
+grant update (status, updated_at) on public.propostas_orcamento to authenticated;
+revoke all on public.propostas_orcamento from anon;
+
+-- A equipe precisa listar os clientes cadastrados para direcionar cada proposta.
+drop policy if exists "Equipe consulta perfis de clientes" on public.profiles;
+create policy "Equipe consulta perfis de clientes"
+  on public.profiles for select to authenticated
+  using ((select public.pcvance_is_staff()));
+
+do $$
+begin
+  alter publication supabase_realtime add table public.propostas_orcamento;
+exception when duplicate_object then
+  null;
+when undefined_object then
+  raise notice 'Publication supabase_realtime não encontrada; propostas serão atualizadas ao abrir/retornar à página.';
+end $$;

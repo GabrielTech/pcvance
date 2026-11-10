@@ -45,3 +45,5 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-colo
 .btn-link { border: 0; background: none; color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 2px; }
 .btn-link:hover { text-decoration: underline; }
 .btn-link:disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }
+
+.brand-icon { display:block; width:46px; height:46px; object-fit:contain; border-radius:10px; }

@@ -16,7 +16,7 @@
 
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-symbol">PC</div>
+        <img class="brand-symbol" src="pcvance_logo.jpeg" alt="Logotipo PCVANCE">
         <div>
           <h2>PCVANCE</h2>
           <small>ÁREA DO CLIENTE</small>
@@ -26,6 +26,7 @@
       <div class="nav-label">MINHA ÁREA</div>
       <button class="nav-item active" data-page="ordens">▤ Minhas ordens</button>
       <button class="nav-item" data-page="solicitar">＋ Solicitar serviço</button>
+      <button class="nav-item" data-page="propostas">▧ Propostas de orçamento <span class="nav-badge hidden" id="proposalClientBadge">0</span></button>
       <button class="nav-item" data-page="perfil">☺ Meu perfil</button>
 
       <div class="nav-label">OUTROS</div>
@@ -139,6 +140,13 @@
             </div>
             <div class="empty-state" id="requestsEmpty"><strong>Você ainda não enviou solicitações</strong><p>Use o formulário acima para pedir atendimento.</p></div>
           </div>
+        </section>
+
+        <!-- PROPOSTAS RECEBIDAS -->
+        <section class="page" id="page-propostas">
+          <div class="page-heading"><div><p class="eyebrow">ORÇAMENTOS</p><h1>Propostas de orçamento</h1><p class="muted">Consulte os orçamentos enviados pela PCVANCE e informe sua decisão.</p></div></div>
+          <div id="clientProposalsList" class="proposal-list"></div>
+          <div class="empty-state" id="clientProposalsEmpty"><strong>Você ainda não recebeu propostas</strong><p>Quando a PCVANCE enviar um orçamento, ele aparecerá aqui.</p></div>
         </section>
 
         <!-- PERFIL -->

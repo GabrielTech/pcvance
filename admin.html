@@ -27,6 +27,7 @@
       <button class="nav-item" data-page="nova">＋ Criar ordem de serviço</button>
       <button class="nav-item" data-page="ordens">▤ Gerenciar OS</button>
       <button class="nav-item" data-page="solicitacoes">✉ Solicitações <span class="nav-badge hidden" id="requestBadge">0</span></button>
+      <button class="nav-item" data-page="propostas">▧ Propostas de orçamento</button>
 
       <div class="nav-label">SISTEMA</div>
       <button class="nav-item" data-page="relatorios">▥ Relatórios</button>
@@ -317,9 +318,32 @@
           </div>
         </section>
 
+        <!-- PROPOSTAS DE ORÇAMENTO -->
+        <section class="page" id="page-propostas">
+          <div class="page-heading"><div><p class="eyebrow">COMERCIAL</p><h1>Propostas de orçamento</h1><p class="muted">Crie uma proposta, envie para a conta do cliente e acompanhe a resposta.</p></div></div>
+          <div class="panel settings-panel">
+            <h2>Nova proposta</h2>
+            <form id="proposalForm">
+              <div class="form-grid">
+                <div class="field span-2"><label>Cliente cadastrado *</label><select id="proposalClient" required><option value="">Carregando clientes...</option></select></div>
+                <div class="field"><label>Título da proposta *</label><input id="proposalTitle" required maxlength="120" placeholder="Ex.: Manutenção de notebook"></div>
+                <div class="field"><label>Valor total (R$) *</label><input id="proposalValue" type="number" min="0" step="0.01" required placeholder="0,00"></div>
+                <div class="field"><label>Validade</label><input id="proposalValid" type="date"></div>
+                <div class="field span-2"><label>Descrição dos serviços e peças *</label><textarea id="proposalDescription" rows="4" required maxlength="2000" placeholder="Descreva os serviços, peças e condições do orçamento."></textarea></div>
+              </div>
+              <button class="btn primary" type="submit">Enviar proposta ao cliente →</button>
+            </form>
+          </div>
+          <div class="panel" style="margin-top:18px">
+            <div class="panel-heading"><div><h2>Propostas enviadas</h2><p class="muted">Acompanhe propostas pendentes, aprovadas e recusadas.</p></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Data</th><th>Cliente</th><th>Proposta</th><th>Valor</th><th>Validade</th><th>Status</th><th></th></tr></thead><tbody id="proposalsTable"></tbody></table></div>
+            <div class="empty-state" id="proposalsEmpty"><strong>Nenhuma proposta enviada</strong><p>As propostas criadas aparecerão aqui.</p></div>
+          </div>
+        </section>
+
         <!-- RELATÓRIOS -->
         <section class="page" id="page-relatorios">
-          <div class="page-heading"><div><p class="eyebrow">DESEMPENHO</p><h1>Relatórios</h1><p class="muted">Resumo dos atendimentos registrados neste navegador.</p></div></div>
+          <div class="page-heading"><div><p class="eyebrow">DESEMPENHO</p><h1>Relatórios</h1><p class="muted">Resumo dos atendimentos registrados no banco compartilhado.</p></div></div>
           <div class="stats-grid">
             <article class="stat-card"><span>Faturamento previsto*</span><strong id="reportTotal">R$ 0,00</strong><small>*Soma dos valores cadastrados (itens "A definir" não entram), não representa pagamentos recebidos.</small></article>
             <article class="stat-card"><span>Ticket médio</span><strong id="reportTicket">R$ 0,00</strong><small>Valor médio por OS</small></article>
@@ -349,7 +373,7 @@
             </form>
             <div class="danger-zone">
               <h3>Dados locais</h3>
-              <p>Os registros ficam neste navegador. Apagar os dados é permanente neste dispositivo se não houver cópia de segurança.</p>
+              <p>As OS ficam no banco compartilhado. Apagar os dados remove os registros para todos os usuários autorizados.</p>
               <button class="btn danger" id="clearData">Apagar todas as OS</button>
             </div>
           </div>

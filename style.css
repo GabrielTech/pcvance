@@ -21,7 +21,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .brand > span:last-child { display: flex; flex-direction: column; }
 .brand > span:last-child > span { color: var(--accent); display: inline; }
 .brand small { font-size: 8px; letter-spacing: 1.7px; color: var(--muted); margin-top: 5px; font-weight: 600; }
-.brand-icon { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 13px; background: linear-gradient(135deg,var(--accent),#2563eb); color: #07131a; font-size: 21px; box-shadow: 0 8px 28px rgba(0,200,255,.16); }
+.brand-icon { display: block; width: 43px; height: 43px; object-fit: contain; border-radius: 10px; }
 .nav { display: flex; align-items: center; gap: 27px; color: #c1c9d6; font-size: 13px; font-weight: 600; }
 .nav a:not(.nav-cta):hover { color: var(--accent); }
 .nav-cta { background: var(--accent); color: #07131a; padding: 11px 15px; border-radius: 9px; font-weight: 800; }
