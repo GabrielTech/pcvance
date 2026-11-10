@@ -378,3 +378,7 @@ a.nav-item { display: block; text-decoration: none; }
 .tbd-check input { width: 15px; height: 15px; padding: 0; accent-color: #00c8ff; cursor: pointer; }
 .items-table .item-price:disabled { opacity: .4; cursor: not-allowed; }
 .item-subtotal { white-space: nowrap; }
+
+/* Ações do formulário de propostas */
+.proposal-form-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+@media(max-width:560px){ .proposal-form-actions .btn { width:100%; } }

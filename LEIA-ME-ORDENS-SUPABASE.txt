@@ -56,3 +56,15 @@ ATUALIZAÇÃO — CONCLUSÃO DE OS E PROPOSTAS DE ORÇAMENTO
 - A proposta aparece na área do cliente > Propostas de orçamento. O cliente pode aprovar ou recusar; a resposta fica registrada no painel administrativo.
 - A tabela public.propostas_orcamento e as permissões necessárias são criadas pelo SQL atualizado supabase-os-setup.sql. Execute o script completo no SQL Editor antes de publicar os arquivos.
 - O logotipo pcvance_logo.jpeg é utilizado no site principal, login, painel administrativo e área do cliente. Mantenha o arquivo junto aos HTMLs.
+
+
+ATUALIZAÇÃO - PROPOSTAS DE ORÇAMENTO E PDF
+
+- Na área Propostas de orçamento, selecione a conta cadastrada do cliente para direcionar a proposta à dashboard correta.
+- O campo Nome do cliente na proposta pode ser editado e será usado no documento PDF.
+- Preencha título, descrição, valor e validade.
+- Use Gerar PDF da proposta para abrir uma versão pronta para impressão; no diálogo de impressão, selecione “Salvar como PDF”.
+- Depois, use Enviar proposta ao cliente para registrar a proposta na dashboard do cliente.
+- Também é possível gerar o PDF de propostas já enviadas, tanto no painel administrativo quanto na área do cliente.
+- O PDF inclui o logotipo PCVANCE e um texto formal de apresentação, condições e agradecimento.
+- A geração usa a função de impressão do navegador, sem biblioteca externa. Permita pop-ups para o site.

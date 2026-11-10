@@ -235,13 +235,19 @@ function renderProposals() {
       <span class="badge ${cls}">${escapeHTML(p.status)}</span></div>
       <p>${escapeHTML(d.descricao || "")}</p>
       <div class="proposal-meta"><div><small>VALOR TOTAL</small><strong>${BRL.format(Number(d.valor) || 0)}</strong></div><div><small>VALIDADE</small><strong>${formatDate(d.validade)}</strong></div></div>
-      ${canRespond ? `<div class="proposal-actions"><button class="btn primary" data-proposal-respond="Aprovada" data-proposal-id="${escapeHTML(p.id)}">Aprovar proposta</button><button class="btn secondary" data-proposal-respond="Recusada" data-proposal-id="${escapeHTML(p.id)}">Recusar</button></div>` : `<p class="muted proposal-response">Resposta registrada: ${escapeHTML(p.status)}.</p>`}
+      ${canRespond ? `<div class="proposal-actions"><button class="btn primary" data-proposal-respond="Aprovada" data-proposal-id="${escapeHTML(p.id)}">Aprovar proposta</button><button class="btn secondary" data-proposal-respond="Recusada" data-proposal-id="${escapeHTML(p.id)}">Recusar</button><button class="btn secondary" data-proposal-pdf="${escapeHTML(p.id)}">Baixar proposta em PDF</button></div>` : `<p class="muted proposal-response">Resposta registrada: ${escapeHTML(p.status)}.</p><button class="btn secondary" data-proposal-pdf="${escapeHTML(p.id)}">Baixar proposta em PDF</button>`}
     </article>`;
   }).join("");
   $("clientProposalsEmpty").classList.toggle("hidden", list.length > 0);
 }
 
 document.addEventListener("click", async e => {
+  const pdfButton = e.target.closest("[data-proposal-pdf]");
+  if (pdfButton) {
+    const proposal = cloudProposals.find(p => p.id === pdfButton.dataset.proposalPdf);
+    if (proposal && window.PCVANCEProposalPDF) window.PCVANCEProposalPDF.generate(proposal.dados || {}, { status:proposal.status, date:proposal.created_at });
+    return;
+  }
   const button = e.target.closest("[data-proposal-respond]");
   if (!button) return;
   const status = button.dataset.proposalRespond;

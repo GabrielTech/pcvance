@@ -741,6 +741,10 @@ async function loadProposalClients() {
   proposalClients = data || [];
   $("proposalClient").innerHTML = '<option value="">Selecione um cliente</option>' +
     proposalClients.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.nome || c.email)} — ${escapeHTML(c.email)}</option>`).join("");
+  $("proposalClient").onchange = () => {
+    const selected = proposalClients.find(c => c.id === $("proposalClient").value);
+    if (selected) $("proposalClientName").value = selected.nome || "";
+  };
 }
 
 function proposalBadge(status) {
@@ -759,14 +763,31 @@ async function loadProposals() {
     const c = proposalClients.find(x => x.id === p.client_id);
     const d = p.dados || {};
     return `<tr><td>${formatDate((p.created_at || "").slice(0,10))}</td>
-      <td><strong>${escapeHTML(c?.nome || "Cliente")}</strong><br><span class="muted">${escapeHTML(c?.email || "")}</span></td>
+      <td><strong>${escapeHTML(d.clienteNome || c?.nome || "Cliente")}</strong><br><span class="muted">${escapeHTML(c?.email || "")}</span></td>
       <td>${escapeHTML(d.titulo || "Orçamento")}</td><td>${proposalMoney(d.valor)}</td>
       <td>${formatDate(d.validade)}</td><td>${proposalBadge(p.status)}</td>
-      <td>${p.status === "Enviada" ? `<button class="icon-btn" data-proposal-cancel="${escapeHTML(p.id)}">Cancelar</button>` : ""}</td></tr>`;
+      <td><button class="icon-btn" data-proposal-pdf="${escapeHTML(p.id)}">Gerar PDF</button> ${p.status === "Enviada" ? `<button class="icon-btn" data-proposal-cancel="${escapeHTML(p.id)}">Cancelar</button>` : ""}</td></tr>`;
   }).join("");
   $("proposalsEmpty").classList.toggle("hidden", proposals.length > 0);
   $("proposalsTable").closest(".table-wrap").classList.toggle("hidden", proposals.length === 0);
 }
+
+$("proposalPdfDraft").addEventListener("click", () => {
+  const client = proposalClients.find(c => c.id === $("proposalClient").value);
+  const draft = {
+    clienteNome: $("proposalClientName").value.trim(),
+    clienteEmail: client?.email || "",
+    titulo: $("proposalTitle").value.trim(),
+    descricao: $("proposalDescription").value.trim(),
+    valor: Number($("proposalValue").value),
+    validade: $("proposalValid").value || null,
+    criadoEm: new Date().toISOString()
+  };
+  if (!draft.clienteNome || !draft.titulo || !draft.descricao || !Number.isFinite(draft.valor)) {
+    return showToast("Preencha o nome do cliente, título, descrição e valor antes de gerar o PDF.", true);
+  }
+  window.PCVANCEProposalPDF.generate(draft, { status:"Prévia da proposta", date:draft.criadoEm });
+});
 
 $("proposalForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -778,9 +799,11 @@ $("proposalForm").addEventListener("submit", async e => {
     descricao: $("proposalDescription").value.trim(),
     valor: Number($("proposalValue").value),
     validade: $("proposalValid").value || null,
-    clienteNome: client.nome,
+    clienteNome: $("proposalClientName").value.trim(),
+    clienteEmail: client.email,
     criadoEm: new Date().toISOString()
   };
+  if (!proposal.clienteNome) return showToast("Informe o nome do cliente que aparecerá no PDF.", true);
   if (!Number.isFinite(proposal.valor) || proposal.valor < 0) return showToast("Informe um valor válido.", true);
   const {error} = await Auth.sb.from("propostas_orcamento").insert({
     client_id: client.id, created_by: currentUser.id, dados: proposal, status: "Enviada"
@@ -792,6 +815,12 @@ $("proposalForm").addEventListener("submit", async e => {
 });
 
 document.addEventListener("click", async event => {
+  const pdfButton = event.target.closest("[data-proposal-pdf]");
+  if (pdfButton) {
+    const item = proposals.find(p => p.id === pdfButton.dataset.proposalPdf);
+    if (item && window.PCVANCEProposalPDF) window.PCVANCEProposalPDF.generate(item.dados || {}, { status:item.status, date:item.created_at });
+    return;
+  }
   const cancel = event.target.closest("[data-proposal-cancel]");
   if (!cancel || !confirm("Cancelar esta proposta?")) return;
   const {error} = await Auth.sb.from("propostas_orcamento").delete().eq("id", cancel.dataset.proposalCancel);
