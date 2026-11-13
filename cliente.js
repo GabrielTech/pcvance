@@ -234,6 +234,8 @@ function renderProposals() {
       <div class="proposal-card-head"><div><span class="eyebrow">PROPOSTA · ${formatDate((p.created_at || "").slice(0,10))}</span><h2>${escapeHTML(d.titulo || "Orçamento PCVANCE")}</h2></div>
       <span class="badge ${cls}">${escapeHTML(p.status)}</span></div>
       <p>${escapeHTML(d.descricao || "")}</p>
+      <div class="proposal-service-block"><h3>Serviços necessários</h3><p>${escapeHTML(d.servicosNecessarios || "Não informado.")}</p></div>
+      ${d.servicosRecomendados ? `<div class="proposal-service-block recommended"><h3>Serviços recomendados <span>(opcionais)</span></h3><p>${escapeHTML(d.servicosRecomendados)}</p></div>` : ""}
       <div class="proposal-meta"><div><small>VALOR TOTAL</small><strong>${BRL.format(Number(d.valor) || 0)}</strong></div><div><small>VALIDADE</small><strong>${formatDate(d.validade)}</strong></div></div>
       ${canRespond ? `<div class="proposal-actions"><button class="btn primary" data-proposal-respond="Aprovada" data-proposal-id="${escapeHTML(p.id)}">Aprovar proposta</button><button class="btn secondary" data-proposal-respond="Recusada" data-proposal-id="${escapeHTML(p.id)}">Recusar</button><button class="btn secondary" data-proposal-pdf="${escapeHTML(p.id)}">Baixar proposta em PDF</button></div>` : `<p class="muted proposal-response">Resposta registrada: ${escapeHTML(p.status)}.</p><button class="btn secondary" data-proposal-pdf="${escapeHTML(p.id)}">Baixar proposta em PDF</button>`}
     </article>`;

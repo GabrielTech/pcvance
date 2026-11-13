@@ -331,7 +331,9 @@
                 <div class="field"><label>Título da proposta *</label><input id="proposalTitle" required maxlength="120" placeholder="Ex.: Manutenção de notebook"></div>
                 <div class="field"><label>Valor total (R$) *</label><input id="proposalValue" type="number" min="0" step="0.01" required placeholder="0,00"></div>
                 <div class="field"><label>Validade</label><input id="proposalValid" type="date"></div>
-                <div class="field span-2"><label>Descrição dos serviços e peças *</label><textarea id="proposalDescription" rows="4" required maxlength="2000" placeholder="Descreva os serviços, peças e condições do orçamento."></textarea></div>
+                <div class="field span-2"><label>Resumo / diagnóstico *</label><textarea id="proposalDescription" rows="3" required maxlength="2000" placeholder="Explique brevemente o problema identificado e o objetivo do orçamento."></textarea></div>
+                <div class="field span-2"><label>Serviços necessários *</label><textarea id="proposalNecessary" rows="4" required maxlength="2500" placeholder="Liste os serviços essenciais para resolver o problema. Ex.: substituição do teclado, mão de obra para instalação..."></textarea><small class="muted">Itens essenciais para solucionar o problema identificado.</small></div>
+                <div class="field span-2"><label>Serviços recomendados (opcionais)</label><textarea id="proposalRecommended" rows="4" maxlength="2500" placeholder="Liste melhorias ou cuidados adicionais que você recomenda. Ex.: limpeza interna, troca para SSD..."></textarea><small class="muted">Itens opcionais. Deixe em branco se não houver recomendações.</small></div>
               </div>
               <div class="proposal-form-actions"><button class="btn secondary" id="proposalPdfDraft" type="button">Gerar PDF da proposta</button><button class="btn primary" type="submit">Enviar proposta ao cliente →</button></div>
             </form>

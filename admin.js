@@ -779,12 +779,14 @@ $("proposalPdfDraft").addEventListener("click", () => {
     clienteEmail: client?.email || "",
     titulo: $("proposalTitle").value.trim(),
     descricao: $("proposalDescription").value.trim(),
+    servicosNecessarios: $("proposalNecessary").value.trim(),
+    servicosRecomendados: $("proposalRecommended").value.trim(),
     valor: Number($("proposalValue").value),
     validade: $("proposalValid").value || null,
     criadoEm: new Date().toISOString()
   };
-  if (!draft.clienteNome || !draft.titulo || !draft.descricao || !Number.isFinite(draft.valor)) {
-    return showToast("Preencha o nome do cliente, título, descrição e valor antes de gerar o PDF.", true);
+  if (!draft.clienteNome || !draft.titulo || !draft.descricao || !draft.servicosNecessarios || !Number.isFinite(draft.valor)) {
+    return showToast("Preencha o nome do cliente, título, resumo, serviços necessários e valor antes de gerar o PDF.", true);
   }
   window.PCVANCEProposalPDF.generate(draft, { status:"Prévia da proposta", date:draft.criadoEm });
 });
@@ -797,6 +799,8 @@ $("proposalForm").addEventListener("submit", async e => {
   const proposal = {
     titulo: $("proposalTitle").value.trim(),
     descricao: $("proposalDescription").value.trim(),
+    servicosNecessarios: $("proposalNecessary").value.trim(),
+    servicosRecomendados: $("proposalRecommended").value.trim(),
     valor: Number($("proposalValue").value),
     validade: $("proposalValid").value || null,
     clienteNome: $("proposalClientName").value.trim(),
@@ -804,6 +808,7 @@ $("proposalForm").addEventListener("submit", async e => {
     criadoEm: new Date().toISOString()
   };
   if (!proposal.clienteNome) return showToast("Informe o nome do cliente que aparecerá no PDF.", true);
+  if (!proposal.servicosNecessarios) return showToast("Informe pelo menos os serviços necessários.", true);
   if (!Number.isFinite(proposal.valor) || proposal.valor < 0) return showToast("Informe um valor válido.", true);
   const {error} = await Auth.sb.from("propostas_orcamento").insert({
     client_id: client.id, created_by: currentUser.id, dados: proposal, status: "Enviada"
